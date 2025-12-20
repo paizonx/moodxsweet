@@ -278,13 +278,25 @@ video{display:none;object-fit:contain}
         setPoster(posterParam);
     }
 
-    // 2. Cek Videy ID (Fix untuk Videy)
+    // 2. Fix Videy: Cari gambar otomatis dari 4 kemungkinan server
     if(id){
       setTitle('Video');
-      // Jika user tidak pasang gambar manual, coba ambil otomatis dari Videy
       if(!posterParam){
-        // Format umum thumbnail Videy: cdn.videy.co/ID.jpg
-        setPoster('https://cdn.videy.co/' + id + '.jpg');
+        const thumbs = [
+          'https://cdn.videy.co/' + id + '.jpg',
+          'https://cdn.videy.co/' + id + '.png',
+          'https://cdn-videys.com/' + id + '.jpg',
+          'https://cdn-videys.com/' + id + '.png'
+        ];
+        let i = 0;
+        const tryNextThumb = () => {
+           if(i >= thumbs.length) return; // Nyerah kalau semua gagal
+           const img = new Image();
+           img.onload = () => setPoster(thumbs[i]); // Berhasil load, pasang!
+           img.onerror = () => { i++; tryNextThumb(); }; // Gagal, coba link berikutnya
+           img.src = thumbs[i];
+        };
+        tryNextThumb();
       }
       return;
     }
