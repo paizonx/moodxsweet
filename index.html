@@ -2,374 +2,117 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>vidstream</title>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Video Player</title>
 <meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy"
+      content="default-src 'self' https:;
+               script-src 'self' https: 'unsafe-inline';
+               style-src 'self' 'unsafe-inline';
+               img-src 'self' data: https:;
+               media-src https:;
+               connect-src 'self' https:;">
 <style>
-:root{
-  --bg:#ffffff;
-  --text:#0b0b0b;
-  --muted:#6b7280;
-  --line:#e5e7eb;
-  --btn:#2563eb;
-  --btnText:#fff;
-}
+:root{--bg:#000;--border:#e5e7eb}
 *{box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-body{margin:0;background:var(--bg);color:var(--text)}
-.container{max-width:980px;margin:0 auto;padding:16px}
-.playerShell{
-  position:relative;
-  width:100%;
-  border:1px solid var(--line);
-  border-radius:12px;
-  overflow:hidden;
-  background:#000;
-  aspect-ratio:16/9;
-}
-.playerShell.vertical{aspect-ratio:9/16;max-height:min(82vh,960px)}
-iframe,video{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}
-iframe{display:none}
-video{display:none;object-fit:contain}
-
-/* Thumbnail MUST be visible */
-.poster{
-  position:absolute;inset:0;
-  background:#000 center/cover no-repeat;
-  opacity:1;
-  transition:opacity .25s ease;
-}
-/* very light gradient only (keep thumbnail visible) */
-.poster::after{
-  content:"";
-  position:absolute;inset:0;
-  background:linear-gradient(to bottom, rgba(0,0,0,.05), rgba(0,0,0,.35));
-}
-
-/* click overlay (minimal, transparent) */
-.overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:18px}
-.card{
-  width:min(520px,92%);
-  background:rgba(0,0,0,.20);
-  border:1px solid rgba(255,255,255,.18);
-  border-radius:14px;
-  backdrop-filter:blur(6px);
-  padding:16px 14px;
-  text-align:center;
-  color:#fff;
-}
-.card h2{margin:0 0 6px 0;font-size:18px;line-height:1.25;font-weight:800}
-.card p{margin:0 0 12px 0;font-size:13px;opacity:.92}
-.actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-.btnP{padding:10px 16px;border-radius:999px;border:0;cursor:pointer;font-weight:800}
-.btnP.play{background:#3b82f6;color:#fff}
-.btnP.dl{background:#111827;color:#fff}
-
-.below{
-  margin-top:14px;
-  border-top:1px solid var(--line);
-  padding-top:14px;
-  text-align:center;
-}
-.btnMain{
-  display:inline-flex;align-items:center;justify-content:center;
-  padding:11px 18px;border-radius:8px;border:0;
-  background:var(--btn);color:var(--btnText);
-  font-weight:800;cursor:pointer;
-  min-width:180px;
-}
-.hint{margin-top:10px;color:var(--muted);font-size:13px}
-.shareRow{
-  margin-top:10px;
-  display:flex;gap:18px;justify-content:center;flex-wrap:wrap;
-  color:var(--muted);font-size:13px
-}
-.shareRow button{background:none;border:0;color:inherit;cursor:pointer;font-weight:600}
-.shareRow button:hover{text-decoration:underline}
-
-.adWrap{margin-top:18px}
-.adBox{border:1px solid var(--line);border-radius:12px;padding:12px}
-.adLabel{margin:0 0 8px 0;color:var(--muted);font-size:12px}
-
-.footer{margin-top:18px;color:var(--muted);font-size:13px;text-align:center}
+body{margin:0;background:#fff}
+.wrap{max-width:900px;margin:0 auto;padding:12px}
+.player-shell{position:relative;width:100%;aspect-ratio:16/9;background:#000;border:1px solid var(--border)}
+.player-shell video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.btn{padding:10px 14px;border:0;border-radius:6px;background:#2563eb;color:#fff;font-weight:700;cursor:pointer}
+.btn.ghost{background:#111827}
+@media(max-width:640px){.player-shell{aspect-ratio:9/16}}
 </style>
 </head>
 <body>
-  <div class="container">
-
-    <div id="shell" class="playerShell">
-      <div id="poster" class="poster"></div>
-
-      <video id="vid" controls playsinline preload="metadata"></video>
-      <iframe id="frame" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
-
-      <div id="overlay" class="overlay">
-        <div class="card">
-          <h2 id="title">Video</h2>
-          <p>Tap Play to start. “Download” opens the same safe link.</p>
-          <div class="actions">
-            <button id="playBtn" class="btnP play">Play</button>
-            <button id="downloadMid" class="btnP dl">Download</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="below">
-      <button id="downloadTop" class="btnMain">Download Video</button>
-      <div class="hint">Share this link</div>
-      <div class="shareRow">
-        <button id="copyBtn">Copy link</button>
-        <button id="emailBtn">Email</button>
-        <button id="twBtn">Twitter</button>
-        <button id="waBtn">WhatsApp</button>
-        <button id="tgBtn">Telegram</button>
-        <button id="fbBtn">Facebook</button>
-      </div>
-    </div>
-
-    <div class="adWrap">
-      <div class="adBox">
-        <p class="adLabel">Sponsored</p>
-        <div id="nativeSlot"></div>
-      </div>
-    </div>
-
-    <div class="footer">Copyright © vidstream</div>
+<div class="wrap">
+  <div class="player-shell">
+    <video id="player" controls playsinline preload="metadata"></video>
   </div>
+
+  <div class="controls">
+    <button class="btn ghost" id="copyBtn">Copy Link</button>
+    <button class="btn" id="dlBtn">Download</button>
+  </div>
+</div>
+
+<!-- Histats -->
+<script>
+var _Hasync=_Hasync||[];
+_Hasync.push(['Histats.start','1,4654540,4,0,0,0,00010000']);
+_Hasync.push(['Histats.fasi','1']);
+_Hasync.push(['Histats.track_hits','']);
+(function(){var hs=document.createElement('script');hs.async=true;hs.src='//s10.histats.com/js15_as.js';document.body.appendChild(hs);})();
+</script>
 
 <script>
 (function(){
-  // --- KONFIGURASI IKLAN ADSTERRA ---
-  const SMARTLINK = "https://harbourbreederdump.com/an29v43y4m?key=549781a632ef3b8389ad01c914a1ee3a";
-  const NATIVE_INVOKE = "https://harbourbreederdump.com/54f40a4ce292a9187e0b9a0feb507f92/invoke.js";
-  const NATIVE_CONTAINER_ID = "container-54f40a4ce292a9187e0b9a0feb507f92";
-  const POPUNDER_SRC = "https://harbourbreederdump.com/2e/a1/21/2ea12153a74996b501c2507cb4eebc96.js";
-  // ----------------------------------
+  const q=new URLSearchParams(location.search);
+  const v=document.getElementById('player');
 
-  const q = new URLSearchParams(location.search);
-  const src = (q.get('src')||'').trim();
-  const id = (q.get('id')||'').trim();
-  const dmParam = (q.get('dm')||q.get('dailymotion')||q.get('dm_id')||'').trim();
-  const vimeoParam = (q.get('vimeo')||q.get('vimeo_id')||'').trim();
-  const urlParam = (q.get('url')||'').trim();
-  const embedParam = (q.get('embed')||'').trim();
-  const ar = (q.get('ar')||'').toLowerCase();
+  // SMARTLINK
+  const SMARTLINK="https://harbourbreederdump.com/an29v43y4m?key=549781a632ef3b8389ad01c914a1ee3a";
 
-  const shell = document.getElementById('shell');
-  const poster = document.getElementById('poster');
-  const overlay = document.getElementById('overlay');
-  const titleEl = document.getElementById('title');
-  const frame = document.getElementById('frame');
-  const vid = document.getElementById('vid');
-
-  function openSmartlink(){
-    if(!SMARTLINK) return;
-    window.open(SMARTLINK, '_blank', 'noopener,noreferrer');
-  }
-  function setPoster(url){
-    if(url) poster.style.backgroundImage = `url("${url}")`;
-  }
-  function setTitle(t){ titleEl.textContent = t || 'Video'; }
-  function forceAspectFromQuery(){
-    if(ar==='9x16'||ar==='9:16'||ar==='vertical'){ shell.classList.add('vertical'); shell.style.aspectRatio='9/16'; }
-    if(ar==='16x9'||ar==='16:9'||ar==='landscape'){ shell.classList.remove('vertical'); shell.style.aspectRatio='16/9'; }
-  }
-  function setAspect(w,h){
-    if(!w || !h) return;
-    const ratio = w/h;
-    if(ratio >= 1){ shell.classList.remove('vertical'); shell.style.aspectRatio='16/9'; }
-    else { shell.classList.add('vertical'); shell.style.aspectRatio='9/16'; }
-  }
-  function extractDmId(input){
-    if(!input) return '';
-    if(/^[a-zA-Z0-9]+$/.test(input) && input.length>=6) return input;
-    try{
-      const u=new URL(input);
-      if(u.hostname.includes('dai.ly')) return u.pathname.replace('/','').split(/[?#]/)[0];
-      const m=u.pathname.match(/\/video\/([^_/?#]+)/i);
-      return (m&&m[1])?m[1]:'';
-    }catch(e){ return ''; }
-  }
-  function extractVimeoId(input){
-    if(!input) return '';
-    if(/^[0-9]+$/.test(input)) return input;
-    try{
-      const u=new URL(input);
-      let m=u.pathname.match(/\/video\/(\d+)/i);
-      if(m&&m[1]) return m[1];
-      m=u.pathname.match(/\/(\d+)/);
-      return (m&&m[1])?m[1]:'';
-    }catch(e){ return ''; }
-  }
-  const dmId = extractDmId(dmParam) || extractDmId(urlParam);
-  const vimeoId = extractVimeoId(vimeoParam) || extractVimeoId(urlParam);
-
-  async function oembedDailyMotion(id){
-    const pageUrl='https://www.dailymotion.com/video/'+id;
-    const o='https://www.dailymotion.com/services/oembed?format=json&url='+encodeURIComponent(pageUrl);
-    const r=await fetch(o,{cache:'force-cache'});
-    if(!r.ok) return null;
-    return await r.json();
-  }
-  async function oembedVimeo(id){
-    const pageUrl='https://vimeo.com/'+id;
-    const o='https://vimeo.com/api/oembed.json?url='+encodeURIComponent(pageUrl);
-    const r=await fetch(o,{cache:'force-cache'});
-    if(!r.ok) return null;
-    return await r.json();
+  // MODE ?src=MP4
+  let src=(q.get('src')||'').trim();
+  if(src){
+    src=decodeURIComponent(src);
+    if(src.startsWith('http://')) src='https://'+src.slice(7);
+    v.src=src;
+    v.load();
   }
 
-  // Share
-  const href = location.href;
-  document.getElementById('copyBtn').onclick=async()=>{ try{ await navigator.clipboard.writeText(href);}catch{ prompt('Copy:',href);} };
-  document.getElementById('emailBtn').onclick=()=>location.href='mailto:?subject=Video&body='+encodeURIComponent(href);
-  document.getElementById('twBtn').onclick=()=>window.open('https://twitter.com/intent/tweet?url='+encodeURIComponent(href),'_blank');
-  document.getElementById('waBtn').onclick=()=>window.open('https://wa.me/?text='+encodeURIComponent(href),'_blank');
-  document.getElementById('tgBtn').onclick=()=>window.open('https://t.me/share/url?url='+encodeURIComponent(href),'_blank');
-  document.getElementById('fbBtn').onclick=()=>window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(href),'_blank');
-
-  // Buttons below video
-  document.getElementById('downloadTop').onclick=openSmartlink;
-  document.getElementById('downloadMid').onclick=openSmartlink;
-
-  function showIframe(url){
-    vid.style.display='none';
-    frame.style.display='block';
-    frame.src=url;
-  }
-  function showVideo(url){
-    frame.style.display='none';
-    vid.style.display='block';
-    vid.src=url;
-    vid.load();
-    vid.play().catch(()=>{});
+  // MODE ?id=VIDEY
+  const id=(q.get('id')||'').trim();
+  if(!src && id){
+    const e=encodeURIComponent(id);
+    const cands=[
+      'https://cdn.videy.co/'+e+'.mp4',
+      'https://cdn.videy.co/'+e+'.m4v',
+      'https://cdn-videys.com/'+e+'.mp4',
+      'https://cdn-videys.com/'+e+'.m4v'
+    ];
+    let i=0;
+    const next=()=>{
+      if(i>=cands.length) return;
+      v.src=cands[i++]+'?t='+(Date.now());
+      v.load();
+    };
+    next();
+    v.addEventListener('error',next);
   }
 
-  async function initPosterAndTitle(){
-    forceAspectFromQuery();
-
-    if(dmId){
-      setTitle('Video');
-      // --- FIX: Paksa tampilkan thumbnail Dailymotion ---
-      setPoster('https://www.dailymotion.com/thumbnail/video/' + dmId);
-      // ------------------------------------------------
-      try{
-        const d=await oembedDailyMotion(dmId);
-        if(d){
-          setTitle(d.title||'Video');
-          if(d.thumbnail_url) setPoster(d.thumbnail_url);
-          if(d.width && d.height) setAspect(d.width, d.height);
-        }
-      }catch(e){}
-      return;
-    }
-    if(vimeoId){
-      setTitle('Video');
-      try{
-        const d=await oembedVimeo(vimeoId);
-        if(d){
-          setTitle(d.title||'Video');
-          setPoster(d.thumbnail_url||'');
-          if(d.width && d.height) setAspect(d.width, d.height);
-        }
-      }catch(e){}
-      return;
-    }
-    if(src || id || embedParam){
-      setTitle('Video');
-      return;
-    }
-    setTitle('Provide a video link');
-  }
-
-  function startPlay(){
-    openSmartlink();
-    overlay.style.display='none';
-    poster.style.opacity='0';
-
-    if(dmId){
-      showIframe('https://www.dailymotion.com/embed/video/'+dmId+'?autoplay=1');
-      return;
-    }
-    if(vimeoId){
-      showIframe('https://player.vimeo.com/video/'+vimeoId+'?autoplay=1');
-      return;
-    }
-    if(embedParam){
-      showIframe(embedParam);
-      return;
-    }
-    if(src){
-      let u=decodeURIComponent(src);
-      if(u.startsWith('http://')) u='https://'+u.slice(7);
-      showVideo(u);
-      return;
-    }
-    if(id){
-      const e=encodeURIComponent(id);
-      const cands=[
-        'https://cdn.videy.co/'+e+'.mp4',
-        'https://cdn.videy.co/'+e+'.m4v',
-        'https://cdn-videys.com/'+e+'.mp4',
-        'https://cdn-videys.com/'+e+'.m4v'
-      ];
-      let i=0;
-      const tryNext=()=>{
-        if(i>=cands.length) return;
-        showVideo(cands[i++]+'?t='+(Date.now()));
-      };
-      tryNext();
-      vid.addEventListener('error',tryNext);
-      return;
-    }
-  }
-
-  document.getElementById('playBtn').onclick=startPlay;
-
-  vid.addEventListener('loadedmetadata',()=>{
-    if(vid.videoWidth && vid.videoHeight) setAspect(vid.videoWidth, vid.videoHeight);
+  // AUTO ASPECT RATIO
+  v.addEventListener('loadedmetadata',()=>{
+    const shell=v.closest('.player-shell');
+    if(v.videoWidth>v.videoHeight) shell.style.aspectRatio='16/9';
+    else shell.style.aspectRatio='9/16';
   });
 
-  // Ads Init
+  document.getElementById('copyBtn').onclick=async()=>{
+    try{await navigator.clipboard.writeText(location.href);}
+    catch{prompt('Copy:',location.href);}
+  };
+  document.getElementById('dlBtn').onclick=()=>location.href=SMARTLINK;
+
+  // Delay ads (popunder + native)
   window.addEventListener('load',()=>{
     setTimeout(()=>{
-      if(NATIVE_CONTAINER_ID){
-        const slot=document.getElementById('nativeSlot');
-        const c=document.createElement('div');
-        c.id=NATIVE_CONTAINER_ID;
-        slot.appendChild(c);
-      }
-      if(NATIVE_INVOKE){
-        const s=document.createElement('script');
-        s.async=true; s.setAttribute('data-cfasync','false'); s.src=NATIVE_INVOKE;
-        document.body.appendChild(s);
-      }
-      if(POPUNDER_SRC){
-        const s2=document.createElement('script');
-        s2.src=POPUNDER_SRC;
-        document.body.appendChild(s2);
-      }
+      const s1=document.createElement('script');
+      s1.async=true;s1.setAttribute('data-cfasync','false');
+      s1.src='https://harbourbreederdump.com/54f40a4ce292a9187e0b9a0feb507f92/invoke.js';
+      document.body.appendChild(s1);
+      const c=document.createElement('div');
+      c.id='container-54f40a4ce292a9187e0b9a0feb507f92';
+      document.body.appendChild(c);
+
+      const s2=document.createElement('script');
+      s2.src='https://harbourbreederdump.com/2e/a1/21/2ea12153a74996b501c2507cb4eebc96.js';
+      document.body.appendChild(s2);
     },1200);
   });
-
-  initPosterAndTitle();
 })();
 </script>
-
-<script type="text/javascript">
-  // GANTI 'YOUR_HISTATS_ID' DI BAWAH DENGAN ANGKA ID ANDA
-  var HISTATS_ID = '4654540'; 
-
-  var _Hasync= _Hasync|| [];
-  _Hasync.push(['Histats.start', '1,'+HISTATS_ID+',4,0,0,0,00010000']);
-  _Hasync.push(['Histats.fasi', '1']);
-  _Hasync.push(['Histats.track_hits', '']);
-  (function() {
-  var hs = document.createElement('script'); hs.type = 'text/javascript'; hs.async = true;
-  hs.src = ('//s10.histats.com/js15_as.js');
-  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(hs);
-  })();
-</script>
-<noscript><a href="/" target="_blank"><img src="//sstatic1.histats.com/0.gif?4654540&101" alt="" border="0"></a></noscript>
 </body>
 </html>
