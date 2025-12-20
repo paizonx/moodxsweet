@@ -34,10 +34,8 @@ body{margin:0;background:var(--bg);color:var(--text)}
 /* --- FIX 9:16 (VERTICAL MODE) --- */
 .playerShell.vertical{
   aspect-ratio: 9/16;
-  /* Batasi tinggi agar tidak melebihi layar HP user */
   max-height: 85vh; 
 }
-/* Di layar besar (Desktop), batasi lebar agar seperti HP */
 @media (min-width: 768px) {
   .playerShell.vertical{
     max-width: 450px; 
@@ -46,13 +44,14 @@ body{margin:0;background:var(--bg);color:var(--text)}
 
 iframe,video{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}
 iframe{display:none}
-video{display:none;object-fit:contain} /* Contain agar video full terlihat */
+video{display:none;object-fit:contain}
 
 .poster{
   position:absolute;inset:0;
   background:#000 center/cover no-repeat;
   opacity:1;
   transition:opacity .25s ease;
+  z-index: 10; /* Pastikan poster di atas sebelum di-play */
 }
 .poster::after{
   content:"";
@@ -60,7 +59,7 @@ video{display:none;object-fit:contain} /* Contain agar video full terlihat */
   background:linear-gradient(to bottom, rgba(0,0,0,.05), rgba(0,0,0,.35));
 }
 
-.overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:18px}
+.overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:18px; z-index: 20;}
 .card{
   width:min(520px,92%);
   background:rgba(0,0,0,.20);
@@ -153,12 +152,12 @@ video{display:none;object-fit:contain} /* Contain agar video full terlihat */
 
 <script>
 (function(){
-  // --- KONFIGURASI IKLAN ADSTERRA ---
+  // --- ADS CONFIG ---
   const SMARTLINK = "https://harbourbreederdump.com/an29v43y4m?key=549781a632ef3b8389ad01c914a1ee3a";
   const NATIVE_INVOKE = "https://harbourbreederdump.com/54f40a4ce292a9187e0b9a0feb507f92/invoke.js";
   const NATIVE_CONTAINER_ID = "container-54f40a4ce292a9187e0b9a0feb507f92";
   const POPUNDER_SRC = "https://harbourbreederdump.com/2e/a1/21/2ea12153a74996b501c2507cb4eebc96.js";
-  // ----------------------------------
+  // ------------------
 
   const q = new URLSearchParams(location.search);
   const src = (q.get('src')||'').trim();
@@ -168,6 +167,9 @@ video{display:none;object-fit:contain} /* Contain agar video full terlihat */
   const urlParam = (q.get('url')||'').trim();
   const embedParam = (q.get('embed')||'').trim();
   const ar = (q.get('ar')||'').toLowerCase();
+  
+  // --- FITUR BARU: Ambil param 'img' atau 'poster' untuk Instant Thumbnail ---
+  const posterParam = (q.get('img')||q.get('poster')||q.get('thumb')||'').trim();
 
   const shell = document.getElementById('shell');
   const poster = document.getElementById('poster');
@@ -185,7 +187,7 @@ video{display:none;object-fit:contain} /* Contain agar video full terlihat */
   }
   function setTitle(t){ titleEl.textContent = t || 'Video'; }
   
-  // --- FIX LOGIC ASPECT RATIO ---
+  // Aspect Ratio Logic
   function setVerticalMode(isVertical){
     if(isVertical){
       shell.classList.add('vertical');
@@ -195,25 +197,15 @@ video{display:none;object-fit:contain} /* Contain agar video full terlihat */
       shell.style.aspectRatio = '16/9';
     }
   }
-
   function forceAspectFromQuery(){
-    if(ar === '9x16' || ar === '9:16' || ar === 'vertical' || ar === 'portrait'){
-      setVerticalMode(true);
-    } else if (ar === '16x9' || ar === '16:9' || ar === 'landscape'){
-      setVerticalMode(false);
-    }
+    if(['9x16','9:16','vertical','portrait'].includes(ar)) setVerticalMode(true);
+    else if(['16x9','16:9','landscape'].includes(ar)) setVerticalMode(false);
   }
-
   function setAspect(w, h){
     if(!w || !h) return;
-    // Jika Tinggi > Lebar, maka Vertical
-    if(h > w){
-      setVerticalMode(true);
-    } else {
-      setVerticalMode(false);
-    }
+    if(h > w) setVerticalMode(true);
+    else setVerticalMode(false);
   }
-  // -----------------------------
 
   function extractDmId(input){
     if(!input) return '';
@@ -254,7 +246,7 @@ video{display:none;object-fit:contain} /* Contain agar video full terlihat */
     return await r.json();
   }
 
-  // Share
+  // Share Buttons
   const href = location.href;
   document.getElementById('copyBtn').onclick=async()=>{ try{ await navigator.clipboard.writeText(href);}catch{ prompt('Copy:',href);} };
   document.getElementById('emailBtn').onclick=()=>location.href='mailto:?subject=Video&body='+encodeURIComponent(href);
@@ -263,7 +255,6 @@ video{display:none;object-fit:contain} /* Contain agar video full terlihat */
   document.getElementById('tgBtn').onclick=()=>window.open('https://t.me/share/url?url='+encodeURIComponent(href),'_blank');
   document.getElementById('fbBtn').onclick=()=>window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(href),'_blank');
 
-  // Buttons below video
   document.getElementById('downloadTop').onclick=openSmartlink;
   document.getElementById('downloadMid').onclick=openSmartlink;
 
@@ -282,32 +273,44 @@ video{display:none;object-fit:contain} /* Contain agar video full terlihat */
 
   async function initPosterAndTitle(){
     forceAspectFromQuery();
+    
+    // --- 1. INSTANT POSTER (Prioritas Utama) ---
+    // Jika ada parameter &img=..., pasang duluan!
+    if(posterParam){
+        setPoster(posterParam);
+    }
+    // ------------------------------------------
 
     if(dmId){
       setTitle('Video');
-      setPoster('https://www.dailymotion.com/thumbnail/video/' + dmId);
+      // Fallback thumbnail DM jika user tidak memberi &img=
+      if(!posterParam) setPoster('https://www.dailymotion.com/thumbnail/video/' + dmId);
+      
       try{
         const d=await oembedDailyMotion(dmId);
         if(d){
           setTitle(d.title||'Video');
-          if(d.thumbnail_url) setPoster(d.thumbnail_url);
+          // Hanya update poster jika user TIDAK kasih poster manual
+          if(d.thumbnail_url && !posterParam) setPoster(d.thumbnail_url);
           if(d.width && d.height) setAspect(d.width, d.height);
         }
       }catch(e){}
       return;
     }
+    
     if(vimeoId){
       setTitle('Video');
       try{
         const d=await oembedVimeo(vimeoId);
         if(d){
           setTitle(d.title||'Video');
-          setPoster(d.thumbnail_url||'');
+          if(d.thumbnail_url && !posterParam) setPoster(d.thumbnail_url);
           if(d.width && d.height) setAspect(d.width, d.height);
         }
       }catch(e){}
       return;
     }
+    
     if(src || id || embedParam){
       setTitle('Video');
       return;
@@ -319,6 +322,7 @@ video{display:none;object-fit:contain} /* Contain agar video full terlihat */
     openSmartlink();
     overlay.style.display='none';
     poster.style.opacity='0';
+    poster.style.zIndex='-1'; // Hide poster behind
 
     if(dmId){
       showIframe('https://www.dailymotion.com/embed/video/'+dmId+'?autoplay=1');
@@ -360,11 +364,10 @@ video{display:none;object-fit:contain} /* Contain agar video full terlihat */
   document.getElementById('playBtn').onclick=startPlay;
 
   vid.addEventListener('loadedmetadata',()=>{
-    // Auto-detect jika video file aslinya vertikal
     if(vid.videoWidth && vid.videoHeight) setAspect(vid.videoWidth, vid.videoHeight);
   });
 
-  // Ads Init
+  // Ads
   window.addEventListener('load',()=>{
     setTimeout(()=>{
       if(NATIVE_CONTAINER_ID){
