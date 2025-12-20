@@ -51,7 +51,7 @@ video{display:none;object-fit:contain}
   background:#000 center/cover no-repeat;
   opacity:1;
   transition:opacity .25s ease;
-  z-index: 10; /* Pastikan poster di atas sebelum di-play */
+  z-index: 10; 
 }
 .poster::after{
   content:"";
@@ -161,14 +161,14 @@ video{display:none;object-fit:contain}
 
   const q = new URLSearchParams(location.search);
   const src = (q.get('src')||'').trim();
-  const id = (q.get('id')||'').trim();
+  const id = (q.get('id')||'').trim(); // VIDEY ID
   const dmParam = (q.get('dm')||q.get('dailymotion')||q.get('dm_id')||'').trim();
   const vimeoParam = (q.get('vimeo')||q.get('vimeo_id')||'').trim();
   const urlParam = (q.get('url')||'').trim();
   const embedParam = (q.get('embed')||'').trim();
   const ar = (q.get('ar')||'').toLowerCase();
   
-  // --- FITUR BARU: Ambil param 'img' atau 'poster' untuk Instant Thumbnail ---
+  // Parameter Manual Image
   const posterParam = (q.get('img')||q.get('poster')||q.get('thumb')||'').trim();
 
   const shell = document.getElementById('shell');
@@ -187,7 +187,6 @@ video{display:none;object-fit:contain}
   }
   function setTitle(t){ titleEl.textContent = t || 'Video'; }
   
-  // Aspect Ratio Logic
   function setVerticalMode(isVertical){
     if(isVertical){
       shell.classList.add('vertical');
@@ -274,23 +273,30 @@ video{display:none;object-fit:contain}
   async function initPosterAndTitle(){
     forceAspectFromQuery();
     
-    // --- 1. INSTANT POSTER (Prioritas Utama) ---
-    // Jika ada parameter &img=..., pasang duluan!
+    // 1. Prioritas Manual Poster (&img=...)
     if(posterParam){
         setPoster(posterParam);
     }
-    // ------------------------------------------
 
+    // 2. Cek Videy ID (Fix untuk Videy)
+    if(id){
+      setTitle('Video');
+      // Jika user tidak pasang gambar manual, coba ambil otomatis dari Videy
+      if(!posterParam){
+        // Format umum thumbnail Videy: cdn.videy.co/ID.jpg
+        setPoster('https://cdn.videy.co/' + id + '.jpg');
+      }
+      return;
+    }
+
+    // 3. Cek Dailymotion
     if(dmId){
       setTitle('Video');
-      // Fallback thumbnail DM jika user tidak memberi &img=
       if(!posterParam) setPoster('https://www.dailymotion.com/thumbnail/video/' + dmId);
-      
       try{
         const d=await oembedDailyMotion(dmId);
         if(d){
           setTitle(d.title||'Video');
-          // Hanya update poster jika user TIDAK kasih poster manual
           if(d.thumbnail_url && !posterParam) setPoster(d.thumbnail_url);
           if(d.width && d.height) setAspect(d.width, d.height);
         }
@@ -298,6 +304,7 @@ video{display:none;object-fit:contain}
       return;
     }
     
+    // 4. Cek Vimeo
     if(vimeoId){
       setTitle('Video');
       try{
@@ -311,7 +318,7 @@ video{display:none;object-fit:contain}
       return;
     }
     
-    if(src || id || embedParam){
+    if(src || embedParam){
       setTitle('Video');
       return;
     }
@@ -322,7 +329,7 @@ video{display:none;object-fit:contain}
     openSmartlink();
     overlay.style.display='none';
     poster.style.opacity='0';
-    poster.style.zIndex='-1'; // Hide poster behind
+    poster.style.zIndex='-1';
 
     if(dmId){
       showIframe('https://www.dailymotion.com/embed/video/'+dmId+'?autoplay=1');
