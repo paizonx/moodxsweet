@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Video Player</title>
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy"
+      content="default-src 'self' https:;
+               script-src 'self' https: 'unsafe-inline';
+               style-src 'self' 'unsafe-inline';
+               img-src 'self' data: https:;
+               media-src https:;
+               connect-src 'self' https:;">
+<style>
+:root{--bg:#000;--border:#e5e7eb}
+*{box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+body{margin:0;background:#fff}
+.wrap{max-width:900px;margin:0 auto;padding:12px}
+.player-shell{position:relative;width:100%;aspect-ratio:16/9;background:#000;border:1px solid var(--border)}
+.player-shell video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.btn{padding:10px 14px;border:0;border-radius:6px;background:#2563eb;color:#fff;font-weight:700;cursor:pointer}
+.btn.ghost{background:#111827}
+@media(max-width:640px){.player-shell{aspect-ratio:9/16}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="player-shell">
+    <video id="player" controls playsinline preload="metadata"></video>
+  </div>
+
+  <div class="controls">
+    <button class="btn ghost" id="copyBtn">Copy Link</button>
+    <button class="btn" id="dlBtn">Download</button>
+  </div>
+</div>
+
+<!-- Histats -->
+<script>
+var _Hasync=_Hasync||[];
+_Hasync.push(['Histats.start','1,4654540,4,0,0,0,00010000']);
+_Hasync.push(['Histats.fasi','1']);
+_Hasync.push(['Histats.track_hits','']);
+(function(){var hs=document.createElement('script');hs.async=true;hs.src='//s10.histats.com/js15_as.js';document.body.appendChild(hs);})();
+</script>
+
+<script>
+(function(){
+  const q=new URLSearchParams(location.search);
+  const v=document.getElementById('player');
+
+  // SMARTLINK
+  const SMARTLINK="https://harbourbreederdump.com/an29v43y4m?key=549781a632ef3b8389ad01c914a1ee3a";
+
+  // MODE ?src=MP4
+  let src=(q.get('src')||'').trim();
+  if(src){
+    src=decodeURIComponent(src);
+    if(src.startsWith('http://')) src='https://'+src.slice(7);
+    v.src=src;
+    v.load();
+  }
+
+  // MODE ?id=VIDEY
+  const id=(q.get('id')||'').trim();
+  if(!src && id){
+    const e=encodeURIComponent(id);
+    const cands=[
+      'https://cdn.videy.co/'+e+'.mp4',
+      'https://cdn.videy.co/'+e+'.m4v',
+      'https://cdn-videys.com/'+e+'.mp4',
+      'https://cdn-videys.com/'+e+'.m4v'
+    ];
+    let i=0;
+    const next=()=>{
+      if(i>=cands.length) return;
+      v.src=cands[i++]+'?t='+(Date.now());
+      v.load();
+    };
+    next();
+    v.addEventListener('error',next);
+  }
+
+  // AUTO ASPECT RATIO
+  v.addEventListener('loadedmetadata',()=>{
+    const shell=v.closest('.player-shell');
+    if(v.videoWidth>v.videoHeight) shell.style.aspectRatio='16/9';
+    else shell.style.aspectRatio='9/16';
+  });
+
+  document.getElementById('copyBtn').onclick=async()=>{
+    try{await navigator.clipboard.writeText(location.href);}
+    catch{prompt('Copy:',location.href);}
+  };
+  document.getElementById('dlBtn').onclick=()=>location.href=SMARTLINK;
+
+  // Delay ads (popunder + native)
+  window.addEventListener('load',()=>{
+    setTimeout(()=>{
+      const s1=document.createElement('script');
+      s1.async=true;s1.setAttribute('data-cfasync','false');
+      s1.src='https://harbourbreederdump.com/54f40a4ce292a9187e0b9a0feb507f92/invoke.js';
+      document.body.appendChild(s1);
+      const c=document.createElement('div');
+      c.id='container-54f40a4ce292a9187e0b9a0feb507f92';
+      document.body.appendChild(c);
+
+      const s2=document.createElement('script');
+      s2.src='https://harbourbreederdump.com/2e/a1/21/2ea12153a74996b501c2507cb4eebc96.js';
+      document.body.appendChild(s2);
+    },1200);
+  });
+})();
+</script>
+</body>
+</html>
