@@ -52,24 +52,20 @@ a { text-decoration: none; color: inherit; }
   display: flex; align-items: center; justify-content: center; 
 }
 
-/* 1. LAYER GAMBAR (Untuk Dailymotion) */
+/* Layer Gambar/Video */
 .thumb-bg {
   position: absolute; inset: 0;
   background-position: center; background-size: cover; background-repeat: no-repeat;
   z-index: 1;
 }
-
-/* 2. LAYER VIDEO (Untuk Videy) */
 .thumb-vid {
   position: absolute; inset: 0;
   width: 100%; height: 100%;
-  object-fit: cover; /* Video full kotak */
+  object-fit: cover; 
   z-index: 2;
 }
-
-/* Overlay & Icon */
-.overlay-shadow { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0.2); z-index: 5; pointer-events: none;}
 .play-icon { width: 45px; height: 45px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); z-index: 10; border: 1px solid rgba(255,255,255,0.3); pointer-events: none; }
+.overlay-shadow { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0.2); z-index: 5; pointer-events: none;}
 
 .card-info { padding: 12px; position: relative; z-index: 20; background: var(--bg-card); }
 .vid-title { font-size: 13px; font-weight: 600; margin: 0; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
@@ -77,8 +73,11 @@ a { text-decoration: none; color: inherit; }
 
 /* Player Page */
 #playerPage { display: none; margin-top: 20px; }
-.playerShell { width: 100%; aspect-ratio: 16/9; background: #000; position: relative; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+.playerShell { width: 100%; aspect-ratio: 16/9; background: #000; position: relative; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 10px 40px rgba(0,0,0,0.5); transition: aspect-ratio 0.3s ease; }
+
+/* Class Vertical (Otomatis ditambahkan JS) */
 .playerShell.vertical { aspect-ratio: 9/16; max-width: 400px; margin: 0 auto; }
+
 video, iframe { width: 100%; height: 100%; position: absolute; inset: 0; border: 0; }
 .back-btn { cursor: pointer; color: var(--accent); margin-bottom: 15px; display: inline-block; font-weight: 600; }
 
@@ -196,7 +195,6 @@ function injectAds() {
 
 async function loadVideos() {
   const target = document.getElementById('gridTarget');
-  
   const timeout = setTimeout(() => {
       if(statusMsg.style.display !== 'none') {
           statusMsg.innerHTML = "<b>Koneksi Lambat.</b><br>Pastikan videos.txt ada.";
@@ -223,18 +221,15 @@ async function loadVideos() {
       const title = parts[1] ? parts[1].trim() : 'Video Tanpa Judul';
       
       let badge = "";
-      let thumbHTML = ""; // Ini yang akan diisi (Gambar atau Video)
+      let thumbHTML = "";
 
       if(id.length > 9 || id.startsWith('k')) {
-         // --- KASUS DAILYMOTION ---
-         // Pake Gambar Thumbnail Saja
+         // Dailymotion: Gambar Thumbnail
          badge = "DM";
          thumbHTML = `<div class="thumb-bg" style="background-image: url('https://www.dailymotion.com/thumbnail/video/${id}');"></div>`;
       } else {
-         // --- KASUS VIDEY ---
-         // Pake Video Player (Muted & Preload Metadata) agar muncul gambar frame pertama
+         // Videy: Video Frame (Muted & Preload Metadata)
          badge = "VIDEY";
-         // preload="metadata" #t=0.1 memaksa browser ambil frame awal tanpa download full
          thumbHTML = `<video src="https://cdn.videy.co/${id}.mp4#t=0.1" preload="metadata" muted playsinline class="thumb-vid"></video>`;
       }
 
@@ -267,17 +262,41 @@ async function loadVideos() {
   }
 }
 
+// --- FUNGSI DETEKSI RASIO DAILYMOTION ---
+async function detectDmRatio(id) {
+  try {
+    // Meminta data video dari Dailymotion
+    const res = await fetch(`https://www.dailymotion.com/services/oembed?url=https://www.dailymotion.com/video/${id}`);
+    const data = await res.json();
+    
+    // Cek: Apakah Tinggi > Lebar?
+    if(data.height > data.width) {
+       shell.classList.add('vertical'); // Ubah jadi potrait (9:16)
+    } else {
+       shell.classList.remove('vertical'); // Tetap landscape (16:9)
+    }
+  } catch(e) {
+    console.log("Gagal deteksi rasio DM, default ke Landscape.");
+  }
+}
+
 function initPlayer() {
   document.getElementById('dlBtn').onclick = function() { window.open(SMARTLINK, '_blank'); };
   
   if(dmId) {
+    // Panggil fungsi deteksi rasio sebelum memuat iframe
+    detectDmRatio(dmId);
+    
     frame.src = `https://www.dailymotion.com/embed/video/${dmId}?autoplay=1&mute=1`;
     vid.style.display = 'none';
   } else if(vidId) {
     if(vidId.length > 9 || vidId.startsWith('k')) {
+       // Fallback jika ID DM masuk ke parameter ?id=
+       detectDmRatio(vidId);
        frame.src = `https://www.dailymotion.com/embed/video/${vidId}?autoplay=1&mute=1`;
        vid.style.display = 'none';
     } else {
+       // Logic Videy (sudah otomatis dari metadata)
        const url = `https://cdn.videy.co/${vidId}.mp4`;
        vid.src = url;
        frame.style.display = 'none';
