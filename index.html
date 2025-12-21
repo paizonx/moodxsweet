@@ -1,429 +1,296 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<title>vidstream</title>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="referrer" content="no-referrer">
+
+<meta property="og:title" content="VidStream Pro">
+<meta property="og:description" content="Nonton video viral terbaru.">
+<meta property="og:image" content="https://cdn.videy.co/DEFAULT_THUMB.jpg"> 
+<meta property="og:type" content="website">
+
+<title>VidStream Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#ffffff;
-  --text:#0b0b0b;
-  --muted:#6b7280;
-  --line:#e5e7eb;
-  --btn:#2563eb;
-  --btnText:#fff;
+/* --- CSS STYLE --- */
+:root {
+  --bg-main: #060b14;
+  --bg-card: #131b2e;
+  --accent: #2563eb;
+  --text-main: #ffffff;
+  --text-muted: #94a3b8;
+  --border: #1e293b;
 }
-*{box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-body{margin:0;background:var(--bg);color:var(--text)}
-.container{max-width:980px;margin:0 auto;padding:16px}
+body { margin: 0; background-color: var(--bg-main); color: var(--text-main); font-family: 'Inter', sans-serif; overflow-x: hidden; }
+a { text-decoration: none; color: inherit; }
 
-/* --- PLAYER STYLE 16:9 DEFAULT --- */
-.playerShell{
-  position:relative;
-  width:100%;
-  border:1px solid var(--line);
-  border-radius:12px;
-  overflow:hidden;
-  background:#000;
-  aspect-ratio:16/9;
-  margin: 0 auto;
-  transition: all 0.3s ease;
-}
+/* Layout */
+.container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+.navbar { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid var(--border); }
+.brand { font-weight: 800; font-size: 20px; color: #fff; display: flex; align-items: center; gap: 8px; }
+.brand span { color: var(--accent); }
 
-/* --- FIX 9:16 (VERTICAL MODE) --- */
-.playerShell.vertical{
-  aspect-ratio: 9/16;
-  max-height: 85vh; 
-}
-@media (min-width: 768px) {
-  .playerShell.vertical{
-    max-width: 450px; 
-  }
-}
+/* Hero */
+.hero { padding: 30px 0; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+.hero h1 { font-size: 28px; font-weight: 800; margin: 0 0 10px 0; }
+.hero p { color: var(--text-muted); margin: 0; font-size: 14px; }
 
-iframe,video{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}
-iframe{display:none}
-video{display:none;object-fit:contain}
+/* Grid */
+.gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; padding-bottom: 50px; }
 
-.poster{
-  position:absolute;inset:0;
-  background:#000 center/cover no-repeat;
-  opacity:1;
-  transition:opacity .25s ease;
-  z-index: 10; 
-}
-.poster::after{
-  content:"";
-  position:absolute;inset:0;
-  background:linear-gradient(to bottom, rgba(0,0,0,.05), rgba(0,0,0,.35));
+/* Card */
+.vid-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; transition: transform 0.2s; display: flex; flex-direction: column; cursor: pointer; position: relative; }
+.vid-card:hover { transform: translateY(-5px); border-color: var(--accent); }
+
+/* THUMBNAIL AREA */
+.thumb-area { 
+  width: 100%; aspect-ratio: 16/9; 
+  background-color: #000; 
+  position: relative; 
+  overflow: hidden;
+  display: flex; align-items: center; justify-content: center; 
 }
 
-.overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:18px; z-index: 20;}
-.card{
-  width:min(520px,92%);
-  background:rgba(0,0,0,.20);
-  border:1px solid rgba(255,255,255,.18);
-  border-radius:14px;
-  backdrop-filter:blur(6px);
-  padding:16px 14px;
-  text-align:center;
-  color:#fff;
+/* 1. LAYER GAMBAR (Untuk Dailymotion) */
+.thumb-bg {
+  position: absolute; inset: 0;
+  background-position: center; background-size: cover; background-repeat: no-repeat;
+  z-index: 1;
 }
-.card h2{margin:0 0 6px 0;font-size:18px;line-height:1.25;font-weight:800}
-.card p{margin:0 0 12px 0;font-size:13px;opacity:.92}
-.actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-.btnP{padding:10px 16px;border-radius:999px;border:0;cursor:pointer;font-weight:800}
-.btnP.play{background:#3b82f6;color:#fff}
-.btnP.dl{background:#111827;color:#fff}
 
-.below{
-  margin-top:14px;
-  border-top:1px solid var(--line);
-  padding-top:14px;
-  text-align:center;
+/* 2. LAYER VIDEO (Untuk Videy) */
+.thumb-vid {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover; /* Video full kotak */
+  z-index: 2;
 }
-.btnMain{
-  display:inline-flex;align-items:center;justify-content:center;
-  padding:11px 18px;border-radius:8px;border:0;
-  background:var(--btn);color:var(--btnText);
-  font-weight:800;cursor:pointer;
-  min-width:180px;
-}
-.hint{margin-top:10px;color:var(--muted);font-size:13px}
-.shareRow{
-  margin-top:10px;
-  display:flex;gap:18px;justify-content:center;flex-wrap:wrap;
-  color:var(--muted);font-size:13px
-}
-.shareRow button{background:none;border:0;color:inherit;cursor:pointer;font-weight:600}
-.shareRow button:hover{text-decoration:underline}
 
-.adWrap{margin-top:18px}
-.adBox{border:1px solid var(--line);border-radius:12px;padding:12px}
-.adLabel{margin:0 0 8px 0;color:var(--muted);font-size:12px}
+/* Overlay & Icon */
+.overlay-shadow { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0.2); z-index: 5; pointer-events: none;}
+.play-icon { width: 45px; height: 45px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); z-index: 10; border: 1px solid rgba(255,255,255,0.3); pointer-events: none; }
 
-.footer{margin-top:18px;color:var(--muted);font-size:13px;text-align:center}
+.card-info { padding: 12px; position: relative; z-index: 20; background: var(--bg-card); }
+.vid-title { font-size: 13px; font-weight: 600; margin: 0; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.badge { font-size: 10px; background: #1e3a8a; color: #93c5fd; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 6px; font-weight: bold; }
+
+/* Player Page */
+#playerPage { display: none; margin-top: 20px; }
+.playerShell { width: 100%; aspect-ratio: 16/9; background: #000; position: relative; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+.playerShell.vertical { aspect-ratio: 9/16; max-width: 400px; margin: 0 auto; }
+video, iframe { width: 100%; height: 100%; position: absolute; inset: 0; border: 0; }
+.back-btn { cursor: pointer; color: var(--accent); margin-bottom: 15px; display: inline-block; font-weight: 600; }
+
+/* Ads */
+.ad-native-wrapper { margin: 30px 0; border: 1px dashed #333; padding: 10px; border-radius: 8px; text-align: center; min-height: 100px; display:flex; align-items:center; justify-content:center; background: #0a0f1c;}
+.footer { margin-top: 50px; padding: 20px; border-top: 1px solid var(--border); text-align: center; color: #555; font-size: 12px; }
 </style>
 </head>
 <body>
-  <div class="container">
 
-    <div id="shell" class="playerShell">
-      <div id="poster" class="poster"></div>
-
-      <video id="vid" controls playsinline preload="metadata"></video>
-      <iframe id="frame" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
-
-      <div id="overlay" class="overlay">
-        <div class="card">
-          <h2 id="title">Video</h2>
-          <p>Tap Play to start. “Download” opens the same safe link.</p>
-          <div class="actions">
-            <button id="playBtn" class="btnP play">Play</button>
-            <button id="downloadMid" class="btnP dl">Download</button>
-          </div>
-        </div>
-      </div>
+<div class="container">
+  
+  <div class="navbar">
+    <div class="brand">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="#2563eb"><rect width="24" height="24" rx="6"/></svg>
+      VidStream<span>Pro</span>
     </div>
-
-    <div class="below">
-      <button id="downloadTop" class="btnMain">Download Video</button>
-      <div class="hint">Share this link</div>
-      <div class="shareRow">
-        <button id="copyBtn">Copy link</button>
-        <button id="emailBtn">Email</button>
-        <button id="twBtn">Twitter</button>
-        <button id="waBtn">WhatsApp</button>
-        <button id="tgBtn">Telegram</button>
-        <button id="fbBtn">Facebook</button>
-      </div>
-    </div>
-
-    <div class="adWrap">
-      <div class="adBox">
-        <p class="adLabel">Sponsored</p>
-        <div id="nativeSlot"></div>
-      </div>
-    </div>
-
-    <div class="footer">Copyright © vidstream</div>
+    <div style="font-size:12px; color:#aaa; cursor:pointer;" onclick="location.reload()">Refresh</div>
   </div>
 
+  <div id="galleryPage">
+    <div class="hero">
+      <h1>Trending Videos</h1>
+      <p>Koleksi video viral terbaru update harian.</p>
+    </div>
+
+    <div id="statusMsg" style="padding: 20px; text-align: center; color: #aaa; margin-bottom: 20px; border: 1px dashed #333;">
+      Sedang memuat daftar video...
+    </div>
+    
+    <div class="gallery-grid" id="gridTarget"></div>
+  </div>
+
+  <div id="playerPage">
+    <div class="back-btn" onclick="window.location.href=window.location.pathname">← Kembali</div>
+    
+    <div id="shell" class="playerShell">
+      <video id="vid" controls playsinline></video>
+      <iframe id="frame" allow="autoplay; fullscreen" allowfullscreen></iframe>
+    </div>
+    
+    <h2 id="vidTitle" style="margin-top:15px; font-size:18px;">Now Playing</h2>
+    
+    <button id="dlBtn" style="background:var(--accent); color:white; border:none; padding:12px 20px; border-radius:8px; margin-top:10px; cursor:pointer; font-weight:bold; width:100%; font-size:16px;">
+      Download Full Video HD
+    </button>
+
+    <div class="ad-native-wrapper">
+       <div id="container-54f40a4ce292a9187e0b9a0feb507f92"></div>
+    </div>
+    
+    <div id="histats-box" style="margin-top:20px; opacity:0.6; text-align:center;"></div>
+  </div>
+
+  <div class="footer">
+    &copy; 2024 VidStream Pro. All rights reserved.
+  </div>
+
+</div>
+
 <script>
-(function(){
-  // --- ADS CONFIG ---
-  const SMARTLINK = "https://harbourbreederdump.com/an29v43y4m?key=549781a632ef3b8389ad01c914a1ee3a";
-  const NATIVE_INVOKE = "https://harbourbreederdump.com/54f40a4ce292a9187e0b9a0feb507f92/invoke.js";
-  const NATIVE_CONTAINER_ID = "container-54f40a4ce292a9187e0b9a0feb507f92";
-  const POPUNDER_SRC = "https://harbourbreederdump.com/2e/a1/21/2ea12153a74996b501c2507cb4eebc96.js";
-  // ------------------
+/* --- CONFIG --- */
+const SMARTLINK = "https://harbourbreederdump.com/an29v43y4m?key=549781a632ef3b8389ad01c914a1ee3a";
+const q = new URLSearchParams(location.search);
+const vidId = q.get('id');
+const dmId = q.get('dm');
 
-  const q = new URLSearchParams(location.search);
-  const src = (q.get('src')||'').trim();
-  const id = (q.get('id')||'').trim(); // VIDEY ID
-  const dmParam = (q.get('dm')||q.get('dailymotion')||q.get('dm_id')||'').trim();
-  const vimeoParam = (q.get('vimeo')||q.get('vimeo_id')||'').trim();
-  const urlParam = (q.get('url')||'').trim();
-  const embedParam = (q.get('embed')||'').trim();
-  const ar = (q.get('ar')||'').toLowerCase();
+// Error Handler
+window.onerror = function(message, source, lineno, colno, error) {
+    const statusMsg = document.getElementById('statusMsg');
+    if(statusMsg && statusMsg.style.display !== 'none') {
+        statusMsg.innerHTML = "<b>System Error:</b> " + message;
+        statusMsg.style.color = "red";
+    }
+};
+
+const statusMsg = document.getElementById('statusMsg');
+const galleryPage = document.getElementById('galleryPage');
+const playerPage = document.getElementById('playerPage');
+const shell = document.getElementById('shell');
+const vid = document.getElementById('vid');
+const frame = document.getElementById('frame');
+
+if(vidId || dmId) {
+  galleryPage.style.display = 'none';
+  playerPage.style.display = 'block';
+  initPlayer();   
+  injectAds();    
+} else {
+  loadVideos();   
+}
+
+function injectAds() {
+    try {
+        const popScript = document.createElement('script');
+        popScript.src = '//harbourbreederdump.com/2e/a1/21/2ea12153a74996b501c2507cb4eebc96.js';
+        document.body.appendChild(popScript);
+
+        const natScript = document.createElement('script');
+        natScript.src = '//harbourbreederdump.com/54f40a4ce292a9187e0b9a0feb507f92/invoke.js';
+        natScript.async = true;
+        natScript.setAttribute('data-cfasync', 'false');
+        document.body.appendChild(natScript);
+
+        const histatsDiv = document.getElementById('histats-box');
+        if(histatsDiv) {
+            const hsScript = document.createElement('script');
+            hsScript.type = 'text/javascript';
+            hsScript.async = true;
+            hsScript.text = `var _Hasync= _Hasync|| []; _Hasync.push(['Histats.start', '1,4654540,4,0,0,0,00010000']); _Hasync.push(['Histats.fasi', '1']); _Hasync.push(['Histats.track_hits', '']); (function() { var hs = document.createElement('script'); hs.type = 'text/javascript'; hs.async = true; hs.src = ('//s10.histats.com/js15_as.js'); (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(hs); })();`;
+            document.body.appendChild(hsScript);
+        }
+    } catch(e) { console.log("Adblocker detected"); }
+}
+
+async function loadVideos() {
+  const target = document.getElementById('gridTarget');
   
-  // Parameter Manual Image
-  const posterParam = (q.get('img')||q.get('poster')||q.get('thumb')||'').trim();
+  const timeout = setTimeout(() => {
+      if(statusMsg.style.display !== 'none') {
+          statusMsg.innerHTML = "<b>Koneksi Lambat.</b><br>Pastikan videos.txt ada.";
+          statusMsg.style.color = "orange";
+      }
+  }, 5000);
 
-  const shell = document.getElementById('shell');
-  const poster = document.getElementById('poster');
-  const overlay = document.getElementById('overlay');
-  const titleEl = document.getElementById('title');
-  const frame = document.getElementById('frame');
-  const vid = document.getElementById('vid');
+  try {
+    const res = await fetch('videos.txt?t=' + Date.now());
+    if(!res.ok) throw new Error("Gagal membaca videos.txt");
+    const text = await res.text();
+    clearTimeout(timeout); 
 
-  function openSmartlink(){
-    if(!SMARTLINK) return;
-    window.open(SMARTLINK, '_blank', 'noopener,noreferrer');
-  }
-  function setPoster(url){
-    if(url) poster.style.backgroundImage = `url("${url}")`;
-  }
-  function setTitle(t){ titleEl.textContent = t || 'Video'; }
-  
-  function setVerticalMode(isVertical){
-    if(isVertical){
-      shell.classList.add('vertical');
-      shell.style.aspectRatio = '9/16';
+    if(text.trim().startsWith("<")) throw new Error("File videos.txt 404/Error.");
+
+    const lines = text.split('\n');
+    let html = '';
+    let found = 0;
+
+    lines.forEach(line => {
+      if(line.trim().length < 3) return;
+      const parts = line.split('|');
+      const id = parts[0].trim();
+      const title = parts[1] ? parts[1].trim() : 'Video Tanpa Judul';
+      
+      let badge = "";
+      let thumbHTML = ""; // Ini yang akan diisi (Gambar atau Video)
+
+      if(id.length > 9 || id.startsWith('k')) {
+         // --- KASUS DAILYMOTION ---
+         // Pake Gambar Thumbnail Saja
+         badge = "DM";
+         thumbHTML = `<div class="thumb-bg" style="background-image: url('https://www.dailymotion.com/thumbnail/video/${id}');"></div>`;
+      } else {
+         // --- KASUS VIDEY ---
+         // Pake Video Player (Muted & Preload Metadata) agar muncul gambar frame pertama
+         badge = "VIDEY";
+         // preload="metadata" #t=0.1 memaksa browser ambil frame awal tanpa download full
+         thumbHTML = `<video src="https://cdn.videy.co/${id}.mp4#t=0.1" preload="metadata" muted playsinline class="thumb-vid"></video>`;
+      }
+
+      html += `
+        <a href="?id=${id}" class="vid-card">
+          <div class="thumb-area">
+            ${thumbHTML}
+            <div class="overlay-shadow"></div>
+            <div class="play-icon"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+          </div>
+          <div class="card-info">
+            <span class="badge">${badge}</span>
+            <p class="vid-title">${title}</p>
+          </div>
+        </a>
+      `;
+      found++;
+    });
+
+    if(found > 0) {
+      target.innerHTML = html;
+      statusMsg.style.display = 'none';
     } else {
-      shell.classList.remove('vertical');
-      shell.style.aspectRatio = '16/9';
+      statusMsg.textContent = "Daftar video kosong.";
+    }
+  } catch (err) {
+    clearTimeout(timeout);
+    statusMsg.innerHTML = "<b>ERROR:</b> " + err.message;
+    statusMsg.style.color = "red";
+  }
+}
+
+function initPlayer() {
+  document.getElementById('dlBtn').onclick = function() { window.open(SMARTLINK, '_blank'); };
+  
+  if(dmId) {
+    frame.src = `https://www.dailymotion.com/embed/video/${dmId}?autoplay=1&mute=1`;
+    vid.style.display = 'none';
+  } else if(vidId) {
+    if(vidId.length > 9 || vidId.startsWith('k')) {
+       frame.src = `https://www.dailymotion.com/embed/video/${vidId}?autoplay=1&mute=1`;
+       vid.style.display = 'none';
+    } else {
+       const url = `https://cdn.videy.co/${vidId}.mp4`;
+       vid.src = url;
+       frame.style.display = 'none';
+       vid.load();
+       vid.muted = true; 
+       vid.play().catch(e => console.log("Autoplay blocked"));
+       vid.onloadedmetadata = function() {
+         if(this.videoHeight > this.videoWidth) { shell.classList.add('vertical'); }
+       };
     }
   }
-  function forceAspectFromQuery(){
-    if(['9x16','9:16','vertical','portrait'].includes(ar)) setVerticalMode(true);
-    else if(['16x9','16:9','landscape'].includes(ar)) setVerticalMode(false);
-  }
-  function setAspect(w, h){
-    if(!w || !h) return;
-    if(h > w) setVerticalMode(true);
-    else setVerticalMode(false);
-  }
-
-  function extractDmId(input){
-    if(!input) return '';
-    if(/^[a-zA-Z0-9]+$/.test(input) && input.length>=6) return input;
-    try{
-      const u=new URL(input);
-      if(u.hostname.includes('dai.ly')) return u.pathname.replace('/','').split(/[?#]/)[0];
-      const m=u.pathname.match(/\/video\/([^_/?#]+)/i);
-      return (m&&m[1])?m[1]:'';
-    }catch(e){ return ''; }
-  }
-  function extractVimeoId(input){
-    if(!input) return '';
-    if(/^[0-9]+$/.test(input)) return input;
-    try{
-      const u=new URL(input);
-      let m=u.pathname.match(/\/video\/(\d+)/i);
-      if(m&&m[1]) return m[1];
-      m=u.pathname.match(/\/(\d+)/);
-      return (m&&m[1])?m[1]:'';
-    }catch(e){ return ''; }
-  }
-  const dmId = extractDmId(dmParam) || extractDmId(urlParam);
-  const vimeoId = extractVimeoId(vimeoParam) || extractVimeoId(urlParam);
-
-  async function oembedDailyMotion(id){
-    const pageUrl='https://www.dailymotion.com/video/'+id;
-    const o='https://www.dailymotion.com/services/oembed?format=json&url='+encodeURIComponent(pageUrl);
-    const r=await fetch(o,{cache:'force-cache'});
-    if(!r.ok) return null;
-    return await r.json();
-  }
-  async function oembedVimeo(id){
-    const pageUrl='https://vimeo.com/'+id;
-    const o='https://vimeo.com/api/oembed.json?url='+encodeURIComponent(pageUrl);
-    const r=await fetch(o,{cache:'force-cache'});
-    if(!r.ok) return null;
-    return await r.json();
-  }
-
-  // Share Buttons
-  const href = location.href;
-  document.getElementById('copyBtn').onclick=async()=>{ try{ await navigator.clipboard.writeText(href);}catch{ prompt('Copy:',href);} };
-  document.getElementById('emailBtn').onclick=()=>location.href='mailto:?subject=Video&body='+encodeURIComponent(href);
-  document.getElementById('twBtn').onclick=()=>window.open('https://twitter.com/intent/tweet?url='+encodeURIComponent(href),'_blank');
-  document.getElementById('waBtn').onclick=()=>window.open('https://wa.me/?text='+encodeURIComponent(href),'_blank');
-  document.getElementById('tgBtn').onclick=()=>window.open('https://t.me/share/url?url='+encodeURIComponent(href),'_blank');
-  document.getElementById('fbBtn').onclick=()=>window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(href),'_blank');
-
-  document.getElementById('downloadTop').onclick=openSmartlink;
-  document.getElementById('downloadMid').onclick=openSmartlink;
-
-  function showIframe(url){
-    vid.style.display='none';
-    frame.style.display='block';
-    frame.src=url;
-  }
-  function showVideo(url){
-    frame.style.display='none';
-    vid.style.display='block';
-    vid.src=url;
-    vid.load();
-    vid.play().catch(()=>{});
-  }
-
-  async function initPosterAndTitle(){
-    forceAspectFromQuery();
-    
-    // 1. Prioritas Manual Poster (&img=...)
-    if(posterParam){
-        setPoster(posterParam);
-    }
-
-    // 2. Fix Videy: Cari gambar otomatis dari 4 kemungkinan server
-    if(id){
-      setTitle('Video');
-      if(!posterParam){
-        const thumbs = [
-          'https://cdn.videy.co/' + id + '.jpg',
-          'https://cdn.videy.co/' + id + '.png',
-          'https://cdn-videys.com/' + id + '.jpg',
-          'https://cdn-videys.com/' + id + '.png'
-        ];
-        let i = 0;
-        const tryNextThumb = () => {
-           if(i >= thumbs.length) return; // Nyerah kalau semua gagal
-           const img = new Image();
-           img.onload = () => setPoster(thumbs[i]); // Berhasil load, pasang!
-           img.onerror = () => { i++; tryNextThumb(); }; // Gagal, coba link berikutnya
-           img.src = thumbs[i];
-        };
-        tryNextThumb();
-      }
-      return;
-    }
-
-    // 3. Cek Dailymotion
-    if(dmId){
-      setTitle('Video');
-      if(!posterParam) setPoster('https://www.dailymotion.com/thumbnail/video/' + dmId);
-      try{
-        const d=await oembedDailyMotion(dmId);
-        if(d){
-          setTitle(d.title||'Video');
-          if(d.thumbnail_url && !posterParam) setPoster(d.thumbnail_url);
-          if(d.width && d.height) setAspect(d.width, d.height);
-        }
-      }catch(e){}
-      return;
-    }
-    
-    // 4. Cek Vimeo
-    if(vimeoId){
-      setTitle('Video');
-      try{
-        const d=await oembedVimeo(vimeoId);
-        if(d){
-          setTitle(d.title||'Video');
-          if(d.thumbnail_url && !posterParam) setPoster(d.thumbnail_url);
-          if(d.width && d.height) setAspect(d.width, d.height);
-        }
-      }catch(e){}
-      return;
-    }
-    
-    if(src || embedParam){
-      setTitle('Video');
-      return;
-    }
-    setTitle('Provide a video link');
-  }
-
-  function startPlay(){
-    openSmartlink();
-    overlay.style.display='none';
-    poster.style.opacity='0';
-    poster.style.zIndex='-1';
-
-    if(dmId){
-      showIframe('https://www.dailymotion.com/embed/video/'+dmId+'?autoplay=1');
-      return;
-    }
-    if(vimeoId){
-      showIframe('https://player.vimeo.com/video/'+vimeoId+'?autoplay=1');
-      return;
-    }
-    if(embedParam){
-      showIframe(embedParam);
-      return;
-    }
-    if(src){
-      let u=decodeURIComponent(src);
-      if(u.startsWith('http://')) u='https://'+u.slice(7);
-      showVideo(u);
-      return;
-    }
-    if(id){
-      const e=encodeURIComponent(id);
-      const cands=[
-        'https://cdn.videy.co/'+e+'.mp4',
-        'https://cdn.videy.co/'+e+'.m4v',
-        'https://cdn-videys.com/'+e+'.mp4',
-        'https://cdn-videys.com/'+e+'.m4v'
-      ];
-      let i=0;
-      const tryNext=()=>{
-        if(i>=cands.length) return;
-        showVideo(cands[i++]+'?t='+(Date.now()));
-      };
-      tryNext();
-      vid.addEventListener('error',tryNext);
-      return;
-    }
-  }
-
-  document.getElementById('playBtn').onclick=startPlay;
-
-  vid.addEventListener('loadedmetadata',()=>{
-    if(vid.videoWidth && vid.videoHeight) setAspect(vid.videoWidth, vid.videoHeight);
-  });
-
-  // Ads
-  window.addEventListener('load',()=>{
-    setTimeout(()=>{
-      if(NATIVE_CONTAINER_ID){
-        const slot=document.getElementById('nativeSlot');
-        const c=document.createElement('div');
-        c.id=NATIVE_CONTAINER_ID;
-        slot.appendChild(c);
-      }
-      if(NATIVE_INVOKE){
-        const s=document.createElement('script');
-        s.async=true; s.setAttribute('data-cfasync','false'); s.src=NATIVE_INVOKE;
-        document.body.appendChild(s);
-      }
-      if(POPUNDER_SRC){
-        const s2=document.createElement('script');
-        s2.src=POPUNDER_SRC;
-        document.body.appendChild(s2);
-      }
-    },1200);
-  });
-
-  initPosterAndTitle();
-})();
+}
 </script>
 
-<script type="text/javascript">
-  var HISTATS_ID = '4654540'; 
-  var _Hasync= _Hasync|| [];
-  _Hasync.push(['Histats.start', '1,'+HISTATS_ID+',4,0,0,0,00010000']);
-  _Hasync.push(['Histats.fasi', '1']);
-  _Hasync.push(['Histats.track_hits', '']);
-  (function() {
-  var hs = document.createElement('script'); hs.type = 'text/javascript'; hs.async = true;
-  hs.src = ('//s10.histats.com/js15_as.js');
-  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(hs);
-  })();
-</script>
-<noscript><a href="/" target="_blank"><img src="//sstatic1.histats.com/0.gif?4654540&101" alt="" border="0"></a></noscript>
 </body>
 </html>
