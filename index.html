@@ -4,177 +4,245 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="referrer" content="no-referrer">
-<meta name="robots" content="index, follow">
+<meta name="robots" content="noindex, nofollow">
 
-<meta property="og:title" content="MovieStream Premium">
-<meta property="og:description" content="Nonton Film & Video Viral Terbaru">
-<meta property="og:type" content="website">
+<title>YouTube Premium</title>
 
-<title>MovieStream Premium</title>
-<link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
 <style>
-/* --- TMDB DARK THEME --- */
+/* --- 1. YOUTUBE DARK THEME VARIABLES --- */
 :root {
-  --bg-main: #0d253f;
-  --bg-header: #032541;
-  --text-main: #ffffff;
-  --text-muted: #b5c2cd;
-  --accent: #01b4e4;
-  --accent-green: #90cea1;
-  --card-width: 160px; /* Lebar Poster TMDB */
+  --bg-main: #0f0f0f;       /* Hitam YouTube */
+  --bg-card: #0f0f0f;
+  --bg-hover: #272727;      /* Abu-abu Hover */
+  --text-main: #f1f1f1;
+  --text-gray: #aaaaaa;
+  --accent: #ff0000;        /* Merah YouTube */
+  --border: #3f3f3f;
+  --header-h: 56px;
+  --card-width: 170px;      /* Lebar Poster Portrait */
 }
 
 * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
-body { margin: 0; background-color: var(--bg-main); color: var(--text-main); font-family: 'Source Sans Pro', sans-serif; overflow-x: hidden; }
+body { margin: 0; background-color: var(--bg-main); color: var(--text-main); font-family: 'Roboto', sans-serif; overflow-x: hidden; }
 a { text-decoration: none; color: inherit; }
 
-/* HEADER TMDB STYLE */
-.header {
-  height: 64px; background: var(--bg-header); display: flex; align-items: center; justify-content: space-between; padding: 0 40px;
-  position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-}
-.logo { font-weight: 700; font-size: 24px; background: linear-gradient(to right, #90cea1, #01b4e4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; cursor: pointer; letter-spacing: 1px; }
-.nav-menu { display: flex; gap: 20px; font-weight: 600; font-size: 14px; }
-.nav-item { cursor: pointer; color: #fff; }
+/* Scrollbar Keren */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-thumb { background: #717171; border-radius: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
 
-/* LAYOUT GRID PORTRAIT (TMDB) */
-.container { max-width: 1300px; margin: 0 auto; padding: 30px 20px; }
-.section-title { font-size: 24px; font-weight: 700; margin-bottom: 20px; border-left: 4px solid var(--accent); padding-left: 15px; }
+/* --- 2. HEADER (YOUTUBE STYLE) --- */
+.header {
+  position: fixed; top: 0; left: 0; right: 0; height: var(--header-h);
+  background: rgba(15, 15, 15, 0.95); backdrop-filter: blur(5px);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 16px; z-index: 100; border-bottom: 1px solid #2b2b2b;
+}
+
+.start { display: flex; align-items: center; gap: 16px; }
+.menu-icon { fill: white; cursor: pointer; padding: 8px; border-radius: 50%; }
+.menu-icon:hover { background: var(--bg-hover); }
+
+.logo { display: flex; align-items: center; gap: 4px; font-weight: 700; font-size: 18px; letter-spacing: -0.5px; cursor: pointer; }
+.logo svg { height: 20px; }
+
+/* Search Bar (Hiasan) */
+.search-bar { display: flex; align-items: center; background: #121212; border: 1px solid #303030; border-radius: 40px; overflow: hidden; width: 40%; max-width: 500px; display:none; }
+@media(min-width: 600px) { .search-bar { display:flex; } } /* Muncul di desktop */
+.search-bar input { background: transparent; border: none; color: white; padding: 8px 16px; width: 100%; font-size: 16px; }
+.search-bar button { background: #222; border: none; border-left: 1px solid #303030; padding: 8px 16px; cursor: pointer; }
+.search-bar button svg { fill: #fff; width: 20px; }
+
+.avatar { width: 32px; height: 32px; background: #5c6bc0; border-radius: 50%; text-align: center; line-height: 32px; font-size: 14px; cursor: pointer; color:white; font-weight:bold;}
+
+/* --- 3. LAYOUT GRID PORTRAIT (TMDB STYLE) --- */
+.container { 
+  max-width: 1400px; margin: 0 auto; 
+  padding: calc(var(--header-h) + 20px) 20px 20px 20px; 
+}
+
+.section-title { font-size: 20px; font-weight: 700; margin-bottom: 20px; color: white; display: flex; align-items: center; gap: 10px; }
+.pill { background: #272727; padding: 5px 12px; border-radius: 8px; font-size: 14px; color: var(--text-main); cursor: pointer; border: 1px solid #3f3f3f; }
+.pill.active { background: white; color: black; border-color: white; }
 
 .grid-poster {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Responsif Poster */
-  gap: 25px;
-  row-gap: 35px;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); /* Responsif */
+  gap: 16px;
+  row-gap: 24px;
 }
 
-/* MOVIE CARD DESIGN */
-.movie-card { position: relative; cursor: pointer; transition: transform 0.2s; }
-.movie-card:hover { transform: translateY(-5px); }
+/* KARTU VIDEO (PORTRAIT) */
+.video-card { cursor: pointer; transition: transform 0.2s; position: relative; }
+.video-card:hover { transform: scale(1.02); }
 
 .poster-box {
   width: 100%;
-  aspect-ratio: 2/3; /* Rasio Portrait Standar Poster Bioskop */
-  border-radius: 10px;
+  aspect-ratio: 2/3; /* Rasio Portrait 2:3 */
+  background: #1f1f1f;
+  border-radius: 12px;
   overflow: hidden;
-  background: #000;
   position: relative;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
 }
-.poster-img { width: 100%; height: 100%; object-fit: cover; opacity: 0.9; transition: opacity 0.2s; }
-.movie-card:hover .poster-img { opacity: 1; }
 
-.rating-circle {
-  position: absolute; bottom: -15px; left: 10px;
-  width: 34px; height: 34px; background: #081c22;
-  border-radius: 50%; border: 2px solid var(--accent-green);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: bold; color: #fff;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.5); z-index: 5;
+.poster-img { 
+  width: 100%; height: 100%; 
+  object-fit: cover; /* KUNCI: Memotong gambar landscape jadi portrait tengah */
+  opacity: 0.9; transition: opacity 0.2s; 
 }
-.rating-sup { font-size: 8px; margin-top: -3px; }
+.video-card:hover .poster-img { opacity: 1; }
 
-.card-info { margin-top: 20px; padding: 0 5px; }
-.movie-title { font-weight: 700; font-size: 15px; line-height: 1.2; margin-bottom: 5px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.movie-date { font-size: 13px; color: var(--text-muted); font-weight: 300; }
+.duration-badge {
+  position: absolute; bottom: 8px; right: 8px;
+  background: rgba(0,0,0,0.8); color: white;
+  padding: 3px 6px; font-size: 11px; border-radius: 4px; font-weight: 500;
+}
 
-/* PLAYER PAGE STYLES */
-#playerPage { display: none; margin-top: 20px; }
-.player-container { max-width: 1000px; margin: 0 auto; padding: 0 20px; }
+.card-info { margin-top: 10px; }
+.vid-title { font-size: 14px; font-weight: 600; line-height: 1.3; margin-bottom: 4px; color: #f1f1f1; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.vid-meta { font-size: 12px; color: var(--text-gray); }
 
-/* Wrapper Video dengan Overlay Pintar */
-.video-wrapper { 
-  position: relative; width: 100%; background: #000; 
-  aspect-ratio: 16/9; border-radius: 12px; overflow: hidden; 
+/* --- 4. PLAYER PAGE (YOUTUBE LAYOUT) --- */
+#playerPage { display: none; margin-top: var(--header-h); padding: 20px; }
+.player-layout { display: flex; gap: 24px; max-width: 1200px; margin: 0 auto; }
+.primary-col { flex: 1; min-width: 0; }
+.secondary-col { width: 350px; flex-shrink: 0; }
+
+.player-shell { 
+  width: 100%; aspect-ratio: 16/9; 
+  background: black; position: relative; 
+  border-radius: 12px; overflow: hidden; 
   box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
-.video-wrapper.vertical { aspect-ratio: 9/16; max-width: 400px; margin: 0 auto; }
+.player-shell.vertical { aspect-ratio: 9/16; max-width: 450px; margin: 0 auto; }
 
-iframe, video { width: 100%; height: 100%; border: none; }
+video, iframe { width: 100%; height: 100%; border: 0; }
 
-/* FULL CUAN OVERLAY (Tombol Play Palsu) */
-.ads-overlay {
+/* FAKE OVERLAY (Agar Iklan Diklik) */
+.fake-overlay {
   position: absolute; inset: 0; z-index: 50;
-  background: rgba(0,0,0,0.3);
+  background: rgba(0,0,0,0.4);
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
 }
-.fake-play-btn {
-  width: 70px; height: 70px; background: rgba(255,0,0,0.9);
+.play-btn-circle {
+  width: 65px; height: 65px; background: rgba(0,0,0,0.6); border: 2px solid white;
   border-radius: 50%; display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 0 20px rgba(0,0,0,0.5);
   transition: transform 0.2s;
 }
-.fake-play-btn svg { fill: white; width: 35px; height: 35px; margin-left: 4px; }
-.ads-overlay:hover .fake-play-btn { transform: scale(1.1); }
+.play-btn-circle svg { fill: white; width: 30px; height: 30px; margin-left: 4px; }
+.fake-overlay:hover .play-btn-circle { transform: scale(1.1); background: var(--accent); border-color: var(--accent); }
 
-.video-meta { margin-top: 20px; background: #102a44; padding: 20px; border-radius: 10px; }
-.vid-h1 { font-size: 22px; margin: 0 0 10px 0; color: #fff; }
-.btn-dl { 
-  display: block; width: 100%; background: var(--accent); color: #fff; 
-  text-align: center; padding: 14px; border-radius: 8px; font-weight: 700; margin-top: 15px; cursor: pointer;
-  box-shadow: 0 4px 10px rgba(1, 180, 228, 0.3); border:none;
-}
+/* VIDEO META INFO */
+.vid-h1 { font-size: 20px; font-weight: 700; margin: 15px 0 10px 0; }
+.channel-row { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #2b2b2b; padding-bottom: 15px; margin-bottom: 15px; }
+.chn-info { display: flex; align-items: center; gap: 10px; }
+.chn-img { width: 40px; height: 40px; border-radius: 50%; background: #333; }
+.sub-btn { background: white; color: black; padding: 8px 16px; border-radius: 18px; font-weight: 600; cursor: pointer; border:none; font-size:14px; }
+.dl-btn { background: #272727; color: white; padding: 8px 16px; border-radius: 18px; font-weight: 500; cursor: pointer; border:none; display:flex; align-items:center; gap:6px; font-size:14px; }
+.dl-btn:hover { background: #3f3f3f; }
 
-/* NATIVE ADS CONTAINER */
-.native-ads-box {
-  margin: 20px 0; padding: 10px; border: 1px dashed #444; background: #081c22;
-  border-radius: 8px; text-align: center; min-height: 120px; display:flex; align-items:center; justify-content:center;
-}
+/* IKLAN NATIVE */
+.ad-native { width: 100%; min-height: 100px; background: #000; border: 1px dashed #333; border-radius: 12px; margin: 10px 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+
+/* REKOMENDASI LIST */
+.rec-item { display: flex; gap: 10px; margin-bottom: 10px; cursor: pointer; }
+.rec-thumb { width: 168px; height: 94px; background: #333; border-radius: 8px; overflow: hidden; flex-shrink: 0; }
+.rec-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.rec-meta h4 { margin: 0 0 5px 0; font-size: 14px; font-weight: 600; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.rec-meta span { font-size: 12px; color: var(--text-gray); }
 
 /* UTILS */
-#statusMsg { padding: 40px; text-align: center; color: var(--text-muted); }
 .hidden { display: none !important; }
+#statusMsg { text-align: center; color: #777; margin-top: 50px; }
 
-@media (max-width: 600px) {
-  .header { padding: 0 20px; }
-  .grid-poster { grid-template-columns: repeat(2, 1fr); gap: 15px; } /* 2 Kolom di HP */
-  .poster-box { aspect-ratio: 2/3; }
+@media (max-width: 900px) {
+  .player-layout { flex-direction: column; }
+  .secondary-col { width: 100%; }
+  .grid-poster { grid-template-columns: repeat(2, 1fr); gap: 10px; } /* 2 Kolom di HP */
 }
 </style>
 </head>
 <body oncontextmenu="return false;">
 
 <div class="header">
-  <div class="logo" onclick="window.location.href=window.location.pathname">MOVIEDB</div>
-  <div class="nav-menu">
-    <div class="nav-item">Popular</div>
-    <div class="nav-item">Trending</div>
+  <div class="start">
+    <div class="menu-icon"><svg viewBox="0 0 24 24" width="24" height="24" fill="white"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"></path></svg></div>
+    <div class="logo" onclick="window.location.href=window.location.pathname">
+      <svg viewBox="0 0 24 24" fill="red"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" fill="white"></path></svg>
+      YouTube <sup style="font-weight:300; font-size:10px; color:#aaa; margin-left:3px;">ID</sup>
+    </div>
   </div>
+  
+  <div class="search-bar">
+    <input type="text" placeholder="Search" readonly>
+    <button><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="white"></path></svg></button>
+  </div>
+
+  <div class="avatar">A</div>
 </div>
 
 <div class="container" id="galleryPage">
-  <div class="section-title">Trending Movies</div>
-  <div id="statusMsg">Memuat Film...</div>
+  <div class="section-title">
+     <div class="pill active">All</div>
+     <div class="pill">Shorts</div>
+     <div class="pill">Videos</div>
+  </div>
+  
+  <div id="statusMsg">Loading videos...</div>
   <div class="grid-poster" id="gridTarget"></div>
 </div>
 
 <div id="playerPage">
-  <div class="player-container">
-    <div style="margin-bottom:15px; color:var(--accent); cursor:pointer; font-weight:600;" onclick="window.location.href=window.location.pathname">← Back to Home</div>
+  <div class="player-layout">
     
-    <div id="shell" class="video-wrapper">
-      
-      <div class="ads-overlay" id="fakeOverlay" onclick="handleAdClick()">
-        <div class="fake-play-btn">
-          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+    <div class="primary-col">
+      <div id="shell" class="player-shell">
+        <div class="fake-overlay" id="fakeOverlay" onclick="handleAdClick()">
+          <div class="play-btn-circle">
+            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          </div>
         </div>
+
+        <video id="vid" controls playsinline class="hidden"></video>
+        <iframe id="frame" allow="autoplay; fullscreen" allowfullscreen class="hidden"></iframe>
       </div>
 
-      <video id="vid" controls playsinline class="hidden"></video>
-      <iframe id="frame" allow="autoplay; fullscreen" allowfullscreen class="hidden"></iframe>
-    </div>
-
-    <div class="video-meta">
-      <h1 class="vid-h1" id="vidTitle">Loading...</h1>
-      <div style="font-size:14px; color:var(--text-muted);">HD Quality • 1080p • Free Streaming</div>
+      <h1 class="vid-h1" id="vidTitle">Video Title Loading...</h1>
       
-      <div class="native-ads-box">
+      <div class="ad-native">
          <div id="container-8754c34f20e587c8ef08a064d9f71e59"></div>
       </div>
 
-      <button class="btn-dl" id="dlBtn">Download Full Movie HD</button>
+      <div class="channel-row">
+        <div class="chn-info">
+           <div class="chn-img"></div>
+           <div>
+             <div style="font-weight:700; font-size:16px;">Viral Official</div>
+             <div style="font-size:12px; color:#aaa;">1.5M subscribers</div>
+           </div>
+           <button class="sub-btn" id="subBtn">Subscribe</button>
+        </div>
+        <div class="chn-info">
+           <button class="dl-btn" id="dlBtn">
+             <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+             Download
+           </button>
+        </div>
+      </div>
+      
+      <div style="background:#272727; padding:12px; border-radius:12px; font-size:14px;">
+        <span style="font-weight:700;">345K views • 5 hours ago</span><br>
+        <span style="color:#ccc">Full HD video streaming. Click subscribe to get more updates. No ads on premium.</span>
+      </div>
+    </div>
+
+    <div class="secondary-col">
+      <h3 style="margin-top:0; font-size:18px;">Up Next</h3>
+      <div id="recTarget"></div>
     </div>
 
   </div>
@@ -183,8 +251,8 @@ iframe, video { width: 100%; height: 100%; border: none; }
 <div id="histats_counter" style="display:none;"></div>
 
 <script>
-/* --- SETTINGS --- */
-const ADS_DIRECT = "https://ridernoodleacerbity.com/pu4v8n14t?key=280fea026bf240b90dd4b3343468c40f";
+/* --- CONFIG --- */
+const ADS_LINK = "https://ridernoodleacerbity.com/pu4v8n14t?key=280fea026bf240b90dd4b3343468c40f";
 const HISTATS_ID = "4879497";
 
 const q = new URLSearchParams(location.search);
@@ -192,154 +260,171 @@ const vidId = q.get('id');
 
 /* --- SECURITY --- */
 document.addEventListener('keydown', e => {
-  if(e.ctrlKey && (e.key==='u'||e.key==='U')) e.preventDefault();
-  if(e.key==='F12') e.preventDefault();
+  if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) e.preventDefault();
+  if (e.key === 'F12') e.preventDefault();
 });
 
-/* --- INIT --- */
+/* --- STARTUP --- */
 if(vidId) {
-  // MODE PLAYER (ADA IKLAN)
-  document.getElementById('galleryPage').classList.add('hidden');
+  document.getElementById('galleryPage').style.display = 'none';
   document.getElementById('playerPage').style.display = 'block';
-  
-  initPlayer();
-  injectAds(); // IKLAN HANYA DI SINI
+  setupPlayer();
+  injectAds();
 } else {
-  // MODE GALLERY (BERSIH TANPA IKLAN)
-  document.getElementById('galleryPage').style.display = 'block';
   loadVideos();
 }
 
-/* --- LOGIC FULL CUAN --- */
+/* --- LOGIC OVERLAY IKLAN --- */
 function handleAdClick() {
-  // 1. Buka Iklan Direct Link di Tab Baru
-  window.open(ADS_DIRECT, '_blank');
+  window.open(ADS_LINK, '_blank');
+  document.getElementById('fakeOverlay').style.display = 'none';
   
-  // 2. Hilangkan Overlay Palsu
-  const overlay = document.getElementById('fakeOverlay');
-  overlay.style.display = 'none';
-  
-  // 3. Mainkan Video (Autoplay)
   const vid = document.getElementById('vid');
   const frame = document.getElementById('frame');
   
   if(!vid.classList.contains('hidden')) {
-    vid.muted = false; // Unmute
-    vid.play();
+     vid.muted = false; 
+     vid.play();
   } else if(!frame.classList.contains('hidden')) {
-    // Refresh iframe dgn autoplay jika perlu, atau biarkan user klik play asli
-    const src = frame.src;
-    frame.src = src; // reload trick for iframe autoplay
+     // Reload iframe trick for autoplay
+     frame.src = frame.src; 
   }
 }
 
 /* --- DATA LOADER --- */
 async function loadVideos() {
+  const statusMsg = document.getElementById('statusMsg');
   try {
     const res = await fetch('videos.txt?t=' + Date.now());
-    if(!res.ok) throw new Error("Gagal baca data");
+    if(!res.ok) throw new Error("Gagal load videos.txt");
     const text = await res.text();
     const lines = text.split('\n');
-    let html = '';
+    
+    let gridHtml = '';
+    const allVideos = [];
 
     lines.forEach(line => {
       if(line.trim().length < 3 || line.startsWith('[')) return;
-      const p = line.split('|');
-      const id = p[0].trim();
-      const title = p[1] ? p[1].trim() : 'Video Viral';
+      const parts = line.split('|');
+      const id = parts[0].trim();
+      const title = parts[1] ? parts[1].trim() : 'Video Viral';
       
-      // Generate Fake Rating acak (70% - 98%) agar terlihat seperti TMDB
-      const rating = Math.floor(Math.random() * (98 - 70 + 1)) + 70;
-      
-      // Thumbnail Logic: Videy/Twing default thumb adalah 16:9
-      // CSS object-fit: cover akan memotongnya jadi Portrait (Poster) otomatis
-      let thumb = `https://cdn.videy.co/${id}.jpg`;
-      if(id.length > 9 || id.startsWith('k')) thumb = `https://www.dailymotion.com/thumbnail/video/${id}`;
+      allVideos.push({id, title});
 
-      html += `
-        <div class="movie-card" onclick="location.href='?id=${id}'">
+      // THUMBNAIL LOGIC (Fix Bug)
+      let thumbUrl = `https://cdn.videy.co/${id}.jpg`;
+      if(id.length > 9 || id.startsWith('k')) {
+         thumbUrl = `https://www.dailymotion.com/thumbnail/video/${id}`;
+      }
+
+      gridHtml += `
+        <div class="video-card" onclick="location.href='?id=${id}'">
           <div class="poster-box">
-            <img src="${thumb}" class="poster-img" loading="lazy" onerror="this.src='https://via.placeholder.com/200x300?text=No+Image'">
-            <div class="rating-circle">${rating}<span class="rating-sup">%</span></div>
+            <img src="${thumbUrl}" class="poster-img" loading="lazy" 
+                 onerror="this.onerror=null; this.src='https://via.placeholder.com/170x255/333/fff?text=No+Thumb';">
+            <div class="duration-badge">${Math.floor(Math.random()*10)+1}:05</div>
           </div>
           <div class="card-info">
-            <div class="movie-title">${title}</div>
-            <div class="movie-date">2024</div>
+            <div class="vid-title">${title}</div>
+            <div class="vid-meta">25K views • 1 day ago</div>
           </div>
         </div>
       `;
     });
 
-    document.getElementById('gridTarget').innerHTML = html;
-    document.getElementById('statusMsg').style.display = 'none';
+    document.getElementById('gridTarget').innerHTML = gridHtml;
+    statusMsg.style.display = 'none';
+
+    // Jika sedang di player page, load rekomendasi
+    if(vidId) renderRecs(allVideos);
 
   } catch(e) {
-    document.getElementById('statusMsg').innerHTML = "Error memuat daftar.";
+    statusMsg.textContent = "Error: " + e.message;
   }
 }
 
-/* --- PLAYER LOGIC --- */
-function initPlayer() {
+function renderRecs(videos) {
+  const target = document.getElementById('recTarget');
+  // Acak video untuk rekomendasi
+  const shuffled = videos.sort(() => 0.5 - Math.random()).slice(0, 10);
+  
+  let html = '';
+  shuffled.forEach(v => {
+    if(v.id === vidId) return;
+    let thumb = `https://cdn.videy.co/${v.id}.jpg`;
+    if(v.id.length > 9) thumb = `https://www.dailymotion.com/thumbnail/video/${v.id}`;
+
+    html += `
+      <div class="rec-item" onclick="location.href='?id=${v.id}'">
+        <div class="rec-thumb">
+          <img src="${thumb}" onerror="this.src='https://via.placeholder.com/168x94?text=Video'">
+        </div>
+        <div class="rec-meta">
+          <h4>${v.title}</h4>
+          <span>Viral Official<br>New Release</span>
+        </div>
+      </div>
+    `;
+  });
+  target.innerHTML = html;
+}
+
+/* --- PLAYER --- */
+function setupPlayer() {
   const vid = document.getElementById('vid');
   const frame = document.getElementById('frame');
   const shell = document.getElementById('shell');
 
-  // Tombol Download -> Direct Link
-  document.getElementById('dlBtn').onclick = () => window.open(ADS_DIRECT, '_blank');
+  document.getElementById('dlBtn').onclick = () => window.open(ADS_LINK, '_blank');
+  document.getElementById('subBtn').onclick = () => window.open(ADS_LINK, '_blank');
 
-  // Judul Sementara
-  document.getElementById('vidTitle').innerText = "Playing Video...";
-  // (Optional) Fetch ulang videos.txt untuk cari judul asli berdasarkan ID jika mau
+  // Set Title sementara (akan ditimpa jika loadVideos selesai)
+  document.getElementById('vidTitle').textContent = "Watching Video...";
 
   if(vidId.length > 9 || vidId.startsWith('k')) {
-    // Dailymotion
-    frame.classList.remove('hidden');
-    checkDmRatio(vidId);
-    // Tambahkan mute=1 agar autoplay jalan di background (menunggu klik overlay)
-    frame.src = `https://www.dailymotion.com/embed/video/${vidId}?autoplay=1&mute=1&controls=1`;
+     // Dailymotion
+     frame.classList.remove('hidden');
+     checkDmRatio(vidId);
+     frame.src = `https://www.dailymotion.com/embed/video/${vidId}?autoplay=1&mute=1&controls=0&ui-start-screen-info=0`;
   } else {
-    // Videy / Twing
-    vid.classList.remove('hidden');
-    // Format standar mp4
-    vid.src = `https://cdn.videy.co/${vidId}.mp4`;
-    vid.load();
-    vid.muted = true; // Mute awal
-    // Deteksi Vertical
-    vid.onloadedmetadata = function() {
-      if(this.videoHeight > this.videoWidth) shell.classList.add('vertical');
-    };
-    vid.onerror = function() {
-        // Fallback Twing jika Videy 404
-        // vid.src = `https://cdn.video.twing.cc/${vidId}.mp4`; 
-    };
+     // MP4 (Videy/Twing)
+     vid.classList.remove('hidden');
+     vid.src = `https://cdn.videy.co/${vidId}.mp4`;
+     vid.muted = true;
+     vid.load();
+     // Auto Portrait Check
+     vid.onloadedmetadata = function() {
+        if(this.videoHeight > this.videoWidth) shell.classList.add('vertical');
+     };
+     // Fallback
+     vid.onerror = function() { console.log("Video load error/fallback needed"); };
   }
 }
 
 async function checkDmRatio(id) {
   try {
-    const r = await fetch(`https://www.dailymotion.com/services/oembed?url=https://www.dailymotion.com/video/${id}`);
-    const d = await r.json();
-    if(d.height > d.width) document.getElementById('shell').classList.add('vertical');
+     const r = await fetch(`https://www.dailymotion.com/services/oembed?url=https://www.dailymotion.com/video/${id}`);
+     const d = await r.json();
+     if(d.height > d.width) document.getElementById('shell').classList.add('vertical');
   } catch(e){}
 }
 
-/* --- ADS INJECTOR (Video Page Only) --- */
+/* --- ADS INJECTOR --- */
 function injectAds() {
-  // 1. Native Banner
-  const s1 = document.createElement('script');
-  s1.src = "https://ridernoodleacerbity.com/8754c34f20e587c8ef08a064d9f71e59/invoke.js";
-  s1.async = true; 
-  s1.setAttribute('data-cfasync','false');
-  document.head.appendChild(s1);
+  // Native
+  const n = document.createElement('script');
+  n.src = "https://ridernoodleacerbity.com/8754c34f20e587c8ef08a064d9f71e59/invoke.js";
+  n.async = true; n.setAttribute('data-cfasync','false');
+  document.head.appendChild(n);
 
-  // 2. Popunder
-  const s2 = document.createElement('script');
-  s2.src = "https://ridernoodleacerbity.com/c9/c0/46/c9c04611f8fb3b0b21da4b49fb98d3fa.js";
-  document.body.appendChild(s2);
+  // Popunder
+  const p = document.createElement('script');
+  p.src = "https://ridernoodleacerbity.com/c9/c0/46/c9c04611f8fb3b0b21da4b49fb98d3fa.js";
+  document.body.appendChild(p);
 
-  // 3. Histats
-  const hs = document.createElement('script');
-  hs.text = `
+  // Histats
+  const h = document.createElement('script');
+  h.text = `
     var _Hasync= _Hasync|| [];
     _Hasync.push(['Histats.start', '1,${HISTATS_ID},4,0,0,0,00010000']);
     _Hasync.push(['Histats.fasi', '1']);
@@ -350,7 +435,7 @@ function injectAds() {
     (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(hs);
     })();
   `;
-  document.body.appendChild(hs);
+  document.body.appendChild(h);
 }
 </script>
 </body>
