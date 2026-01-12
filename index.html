@@ -5,20 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="index, follow">
-<meta name="description" content="Watch the latest trending viral videos from USA and around the world.">
+<meta name="description" content="Watch trending viral videos daily.">
 
 <title>Viral Video - Trending Today</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
 
 <style>
-/* --- 1. CORE THEME VARIABLES (Dark Mode) --- */
+/* --- THEME VARIABLES --- */
 :root {
   --bg-main: #0f0f0f;
-  --bg-hover: #272727;
+  --bg-card: #1f1f1f;
   --text-main: #ffffff;
-  --text-gray: #aaaaaa;
-  --accent: #cc0000; /* YouTube/Netflix Red */
+  --accent: #ff0000;
   --header-h: 60px;
 }
 
@@ -26,185 +25,157 @@
 body { margin: 0; background-color: var(--bg-main); color: var(--text-main); font-family: 'Roboto', sans-serif; overflow-x: hidden; }
 a { text-decoration: none; color: inherit; }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-thumb { background: #555; border-radius: 3px; }
-::-webkit-scrollbar-track { background: transparent; }
-
-/* --- 2. HEADER --- */
+/* --- HEADER --- */
 .header {
   position: fixed; top: 0; left: 0; right: 0; height: var(--header-h);
   background: rgba(15, 15, 15, 0.95); backdrop-filter: blur(10px);
   display: flex; align-items: center; justify-content: space-between;
-  padding: 0 16px; z-index: 100; border-bottom: 1px solid #2b2b2b;
+  padding: 0 16px; z-index: 100; border-bottom: 1px solid #333;
 }
-
-.logo-section { display: flex; align-items: center; gap: 8px; cursor: pointer; }
-.logo-icon { width: 32px; height: 32px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 10px rgba(204,0,0,0.5); }
-.logo-text { font-weight: 900; font-size: 20px; letter-spacing: -0.5px; font-family: 'Roboto', sans-serif; }
-.logo-text span { color: var(--accent); }
-
-/* Install App Button */
+.logo { font-weight: 900; font-size: 20px; display: flex; align-items: center; gap: 5px; cursor: pointer; }
+.logo span { color: var(--accent); }
 .install-btn {
-  background: #3ea6ff; color: #000; 
-  padding: 8px 16px; border-radius: 20px; 
-  font-weight: 600; font-size: 14px; 
-  cursor: pointer; transition: 0.2s;
-  display: flex; align-items: center; gap: 6px;
+  background: #3ea6ff; color: #000; padding: 6px 14px; border-radius: 20px; 
+  font-weight: 600; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 5px;
 }
-.install-btn:hover { background: #65b8ff; }
 
-/* --- 3. MAIN LAYOUT (TMDB Portrait) --- */
+/* --- GRID GALLERY (PORTRAIT) --- */
 .container { 
   max-width: 1400px; margin: 0 auto; 
   padding: calc(var(--header-h) + 15px) 15px 40px 15px; 
 }
+.filter-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 15px; scrollbar-width: none; }
+.pill { background: #272727; padding: 8px 16px; border-radius: 8px; font-size: 14px; white-space: nowrap; cursor: pointer; border: 1px solid #333; }
+.pill.active { background: #f1f1f1; color: black; border-color: white; }
 
-/* Filter Pills */
-.filter-bar { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 15px; scrollbar-width: none; }
-.filter-bar::-webkit-scrollbar { display: none; }
-.pill { 
-  white-space: nowrap; background: #272727; padding: 8px 16px; 
-  border-radius: 8px; font-size: 14px; font-weight: 500; 
-  cursor: pointer; border: 1px solid rgba(255,255,255,0.1); transition: 0.2s;
-}
-.pill:hover { background: #3f3f3f; }
-.pill.active { background: #f1f1f1; color: black; border-color: #fff; }
-
-/* Grid System */
-.grid-poster {
+.grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Auto Responsive */
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 12px; row-gap: 24px;
 }
 
-/* CARD DESIGN */
-.video-card { cursor: pointer; position: relative; transition: transform 0.2s; }
-.video-card:hover { transform: translateY(-4px); }
+.card { cursor: pointer; position: relative; transition: transform 0.2s; }
+.card:hover { transform: translateY(-4px); }
 
-.poster-box {
-  width: 100%; aspect-ratio: 9/14; /* Portrait Ratio (Mirip TikTok/Reels thumbnail) */
-  background: #1a1a1a; border-radius: 10px; overflow: hidden;
-  position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+.poster {
+  width: 100%; aspect-ratio: 9/14; /* Portrait Ratio */
+  background: #000; border-radius: 10px; overflow: hidden;
+  position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
 }
-.poster-img { width: 100%; height: 100%; object-fit: cover; transition: opacity 0.3s; }
-.video-card:hover .poster-img { opacity: 0.8; }
 
-.hd-badge { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); color: #fff; padding: 2px 6px; font-size: 10px; border-radius: 4px; font-weight: bold; border: 1px solid rgba(255,255,255,0.2); }
-.views-badge { position: absolute; bottom: 8px; left: 8px; display: flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+/* KUNCI PERBAIKAN: Video sebagai Thumbnail */
+.thumb-media { 
+  width: 100%; height: 100%; 
+  object-fit: cover; /* Agar video full portrait tanpa gepeng */
+  display: block;
+}
 
-.card-info { margin-top: 10px; padding: 0 2px; }
-.vid-title { font-size: 14px; font-weight: 500; line-height: 1.3; color: #e1e1e1; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.vid-date { font-size: 12px; color: #888; margin-top: 4px; }
+.views-pill {
+  position: absolute; bottom: 8px; left: 8px;
+  background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+  color: white; padding: 2px 6px; border-radius: 4px;
+  font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 4px;
+}
+.hd-tag {
+  position: absolute; top: 8px; right: 8px;
+  background: rgba(0,0,0,0.6); color: white;
+  padding: 2px 5px; border-radius: 3px;
+  font-size: 10px; font-weight: bold; border: 1px solid rgba(255,255,255,0.3);
+}
 
-/* --- 4. PLAYER PAGE --- */
+.meta { margin-top: 10px; padding: 0 2px; }
+.title { font-size: 14px; font-weight: 500; line-height: 1.3; color: #eee; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.date { font-size: 12px; color: #888; margin-top: 4px; }
+
+/* --- PLAYER PAGE --- */
 #playerPage { display: none; padding-top: var(--header-h); }
-.player-container { max-width: 1100px; margin: 0 auto; padding: 20px; }
-.player-wrapper { display: flex; flex-direction: column; gap: 20px; }
+.p-container { max-width: 1000px; margin: 0 auto; padding: 20px; }
 
-.video-shell { 
+.vid-box { 
   width: 100%; aspect-ratio: 16/9; background: #000; 
   border-radius: 12px; overflow: hidden; position: relative; 
   box-shadow: 0 10px 40px rgba(0,0,0,0.6); 
 }
-.video-shell.vertical { aspect-ratio: 9/16; max-width: 400px; margin: 0 auto; }
+.vid-box.vertical { aspect-ratio: 9/16; max-width: 400px; margin: 0 auto; }
 
-/* Fake Overlay (Money Maker) */
-.fake-overlay {
+/* Money Maker Overlay */
+.overlay {
   position: absolute; inset: 0; z-index: 50;
-  background: rgba(0,0,0,0.5); cursor: pointer;
+  background: rgba(0,0,0,0.4); cursor: pointer;
   display: flex; align-items: center; justify-content: center;
 }
-.play-btn-lg {
-  width: 80px; height: 80px; background: rgba(255,0,0,0.9); border-radius: 50%;
+.play-icon {
+  width: 70px; height: 70px; background: rgba(255,0,0,0.9); border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 0 30px rgba(255,0,0,0.4); animation: pulse 2s infinite;
+  box-shadow: 0 0 20px rgba(255,0,0,0.5);
 }
-@keyframes pulse { 0% {box-shadow: 0 0 0 0 rgba(255,0,0,0.7);} 70% {box-shadow: 0 0 0 20px rgba(255,0,0,0);} 100% {box-shadow: 0 0 0 0 rgba(255,0,0,0);} }
 
 video, iframe { width: 100%; height: 100%; border: none; }
 .hidden { display: none !important; }
 
-/* Video Meta */
-.vid-h1 { font-size: 22px; font-weight: 700; margin: 10px 0; line-height: 1.3; }
-.action-row { display: flex; gap: 10px; margin-top: 15px; border-bottom: 1px solid #333; padding-bottom: 20px; }
-.btn-action { flex: 1; padding: 12px; border-radius: 30px; border: none; font-weight: 600; cursor: pointer; font-size: 14px; }
-.btn-dl { background: var(--text-main); color: #000; }
-.btn-share { background: #272727; color: #fff; }
+.p-info { margin-top: 20px; }
+.p-title { font-size: 20px; font-weight: 700; margin-bottom: 10px; }
+.p-actions { display: flex; gap: 10px; margin-top: 15px; border-bottom: 1px solid #333; padding-bottom: 20px; }
+.btn { flex: 1; padding: 12px; border-radius: 30px; border: none; font-weight: 600; cursor: pointer; font-size: 14px; }
+.btn-dl { background: white; color: black; }
+.btn-share { background: #333; color: white; }
 
-/* Ad Native Box */
-.ad-box { margin: 20px 0; background: #050505; border: 1px dashed #333; border-radius: 8px; min-height: 100px; display: flex; align-items: center; justify-content: center; }
+.ad-slot { margin: 20px 0; background: #050505; border: 1px dashed #333; border-radius: 8px; min-height: 100px; display: flex; align-items: center; justify-content: center; }
 
 @media (max-width: 768px) {
-  .grid-poster { grid-template-columns: repeat(2, 1fr); gap: 10px; } 
-  .logo-text { font-size: 18px; }
-  .install-btn span { display: none; } /* Hanya ikon di HP kecil */
+  .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
 }
 </style>
 </head>
 <body oncontextmenu="return false;">
 
 <div class="header">
-  <div class="logo-section" onclick="window.location.href=window.location.pathname">
-    <div class="logo-icon">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
-    </div>
-    <div class="logo-text">Viral<span>Video</span></div>
+  <div class="logo" onclick="window.location.href=window.location.pathname">
+    Viral<span>Video</span>
   </div>
-  
-  <div class="install-btn" onclick="alert('App coming soon to Store!')">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
-    <span>Install App</span>
+  <div class="install-btn" onclick="alert('Coming Soon!')">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+    Install App
   </div>
 </div>
 
 <div class="container" id="galleryPage">
-  
-  <div class="filter-bar">
+  <div class="filter-scroll">
     <div class="pill active">Trending Today</div>
     <div class="pill">Hot USA</div>
-    <div class="pill">For You</div>
-    <div class="pill">New Release</div>
     <div class="pill">Viral TikTok</div>
+    <div class="pill">For You</div>
   </div>
 
-  <div id="statusMsg" style="text-align:center; padding:50px; color:#666;">Loading content...</div>
-  <div class="grid-poster" id="gridTarget"></div>
+  <div id="statusMsg" style="text-align:center; padding:40px; color:#666;">Loading videos...</div>
+  <div class="grid" id="gridTarget"></div>
 </div>
 
 <div id="playerPage">
-  <div class="player-container">
-    <div onclick="window.location.href=window.location.pathname" style="cursor:pointer; color:#aaa; font-size:14px; margin-bottom:15px; display:inline-block;">&larr; Back to Trending</div>
-
-    <div class="player-wrapper">
-      <div id="shell" class="video-shell">
-        <div class="fake-overlay" id="fakeOverlay" onclick="handleAdClick()">
-          <div class="play-btn-lg">
-             <svg width="40" height="40" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
-          </div>
+  <div class="p-container">
+    <div onclick="window.location.href=window.location.pathname" style="cursor:pointer; color:#aaa; font-size:14px; margin-bottom:15px;">&larr; Back to Trending</div>
+    
+    <div class="vid-box" id="shell">
+      <div class="overlay" id="fakeOverlay" onclick="handleAdClick()">
+        <div class="play-icon">
+           <svg width="35" height="35" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
         </div>
+      </div>
+      <video id="vid" controls playsinline class="hidden"></video>
+      <iframe id="frame" allow="autoplay; fullscreen" allowfullscreen class="hidden"></iframe>
+    </div>
 
-        <video id="vid" controls playsinline class="hidden"></video>
-        <iframe id="frame" allow="autoplay; fullscreen" allowfullscreen class="hidden"></iframe>
+    <div class="p-info">
+      <h1 class="p-title" id="vidTitle">Loading...</h1>
+      <div style="font-size:13px; color:#aaa;">2.4M Views • Trending in United States</div>
+
+      <div class="ad-slot">
+         <div id="container-8754c34f20e587c8ef08a064d9f71e59"></div>
       </div>
 
-      <div>
-        <h1 class="vid-h1" id="vidTitle">Loading...</h1>
-        <div style="font-size:13px; color:#aaa;">2.4M Views • Trending in USA</div>
-        
-        <div class="ad-box">
-          <div id="container-8754c34f20e587c8ef08a064d9f71e59"></div>
-        </div>
-
-        <div class="action-row">
-          <button class="btn-action btn-dl" id="dlBtn">Download Video</button>
-          <button class="btn-action btn-share" onclick="window.open(ADS_LINK, '_blank')">Share</button>
-        </div>
-
-        <div style="background:#1a1a1a; padding:15px; border-radius:10px; font-size:14px; line-height:1.5;">
-          <p style="margin:0; font-weight:bold; margin-bottom:5px;">Video Description</p>
-          <p style="margin:0; color:#ccc;">Watch full viral video in HD quality. No ads for premium members. Updated daily with the best content from United States and Global.</p>
-        </div>
+      <div class="p-actions">
+        <button class="btn btn-dl" id="dlBtn">Download HD</button>
+        <button class="btn btn-share" onclick="window.open(ADS_LINK)">Share</button>
       </div>
     </div>
   </div>
@@ -213,14 +184,14 @@ video, iframe { width: 100%; height: 100%; border: none; }
 <div id="histats_counter" style="display:none;"></div>
 
 <script>
-/* --- CONFIGURATION --- */
+/* --- CONFIG --- */
 const ADS_LINK = "https://ridernoodleacerbity.com/pu4v8n14t?key=280fea026bf240b90dd4b3343468c40f"; 
 const HISTATS_ID = "4879497";
 
 const q = new URLSearchParams(location.search);
 const vidId = q.get('id');
 
-/* --- SECURITY --- */
+/* --- BLOCK KEY SHORTCUTS --- */
 document.addEventListener('keydown', e => {
   if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) e.preventDefault();
   if (e.key === 'F12') e.preventDefault();
@@ -236,23 +207,21 @@ if(vidId) {
   loadVideos();
 }
 
-/* --- LOGIC: FAKE PLAYER (MAX REVENUE) --- */
+/* --- LOGIC: CLICK TO AD --- */
 function handleAdClick() {
-  window.open(ADS_LINK, '_blank'); // Open Ad
-  document.getElementById('fakeOverlay').style.display = 'none'; // Remove Overlay
-  
+  window.open(ADS_LINK, '_blank');
+  document.getElementById('fakeOverlay').style.display = 'none';
   const vid = document.getElementById('vid');
   const frame = document.getElementById('frame');
   
   if(!vid.classList.contains('hidden')) {
      vid.muted = false; vid.play();
   } else if(!frame.classList.contains('hidden')) {
-     // Reload iframe to force autoplay
      frame.src = frame.src; 
   }
 }
 
-/* --- LOGIC: CONTENT LOADER --- */
+/* --- LOGIC: GALLERY WITH VIDEO THUMBNAIL --- */
 async function loadVideos() {
   const statusMsg = document.getElementById('statusMsg');
   try {
@@ -267,31 +236,43 @@ async function loadVideos() {
       const parts = line.split('|');
       const id = parts[0].trim();
       const title = parts[1] ? parts[1].trim() : 'Viral Video US';
-      
-      // GENERATE VIEWS RANDOM (Format US: 1.2M, 500K)
-      const views = (Math.random() * (5 - 0.1) + 0.1).toFixed(1) + "M";
+      const views = (Math.random() * (5 - 0.5) + 0.5).toFixed(1) + "M";
 
-      // THUMBNAIL LOGIC (Fixing the "Missing Preview" Issue)
-      // Kita pakai fallback error handler langsung di tag IMG
-      let thumbUrl = `https://cdn.videy.co/${id}.jpg`;
+      // 1. CEK SUMBER
+      let mediaHtml = '';
       if(id.length > 9 || id.startsWith('k')) {
-         thumbUrl = `https://www.dailymotion.com/thumbnail/video/${id}`;
+         // DAILYMOTION (Punya JPG)
+         mediaHtml = `<img src="https://www.dailymotion.com/thumbnail/video/${id}" class="thumb-media" loading="lazy">`;
+      } else {
+         // VIDEY (PAKAI VIDEO LANGSUNG AGAR MUNCUL PREVIEW)
+         // preload="metadata" = hemat kuota, cuma load frame awal
+         // muted = wajib agar bisa autoplay di beberapa browser (opsional)
+         // onmouseover = efek play saat kursor di atasnya
+         mediaHtml = `
+           <video src="https://cdn.videy.co/${id}.mp4#t=0.1" 
+                  class="thumb-media" 
+                  preload="metadata" 
+                  muted 
+                  playsinline 
+                  onmouseover="this.play()" 
+                  onmouseout="this.pause();this.currentTime=0;">
+           </video>
+         `;
       }
 
       html += `
-        <div class="video-card" onclick="location.href='?id=${id}'">
-          <div class="poster-box">
-             <img src="${thumbUrl}" class="poster-img" loading="lazy" 
-                  onerror="this.onerror=null; this.src='https://dummyimage.com/450x800/222/fff.jpg&text=Click+to+Watch';">
-             <div class="hd-badge">HD</div>
-             <div class="views-badge">
+        <div class="card" onclick="location.href='?id=${id}'">
+          <div class="poster">
+             ${mediaHtml}
+             <div class="hd-tag">HD</div>
+             <div class="views-pill">
                <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
                ${views}
              </div>
           </div>
-          <div class="card-info">
-            <div class="vid-title">${title}</div>
-            <div class="vid-date">Trending Today</div>
+          <div class="meta">
+            <div class="title">${title}</div>
+            <div class="date">Trending Today</div>
           </div>
         </div>
       `;
@@ -301,34 +282,28 @@ async function loadVideos() {
     statusMsg.style.display = 'none';
 
   } catch(e) {
-    statusMsg.innerHTML = "Error loading content. Please check videos.txt";
+    statusMsg.innerHTML = "Error loading content.";
   }
 }
 
-/* --- LOGIC: PLAYER SETUP --- */
+/* --- PLAYER SETUP --- */
 function setupPlayer() {
   const vid = document.getElementById('vid');
   const frame = document.getElementById('frame');
   const shell = document.getElementById('shell');
 
   document.getElementById('dlBtn').onclick = () => window.open(ADS_LINK, '_blank');
-  
-  // Set Temporary Title
-  document.getElementById('vidTitle').textContent = "Wait a moment...";
+  document.getElementById('vidTitle').textContent = "Please Wait...";
 
   if(vidId.length > 9 || vidId.startsWith('k')) {
-     // Dailymotion
      frame.classList.remove('hidden');
      checkDmRatio(vidId);
      frame.src = `https://www.dailymotion.com/embed/video/${vidId}?autoplay=1&mute=1&controls=0&ui-logo=0`;
   } else {
-     // MP4 (Videy)
      vid.classList.remove('hidden');
      vid.src = `https://cdn.videy.co/${vidId}.mp4`;
      vid.muted = true;
      vid.load();
-     
-     // Detect Orientation
      vid.onloadedmetadata = function() {
         if(this.videoHeight > this.videoWidth) shell.classList.add('vertical');
      };
@@ -343,20 +318,17 @@ async function checkDmRatio(id) {
   } catch(e){}
 }
 
-/* --- ADS INJECTION --- */
+/* --- ADS --- */
 function injectAds() {
-  // Native Banner
   const n = document.createElement('script');
   n.src = "https://ridernoodleacerbity.com/8754c34f20e587c8ef08a064d9f71e59/invoke.js";
   n.async = true; n.setAttribute('data-cfasync','false');
   document.head.appendChild(n);
 
-  // Popunder
   const p = document.createElement('script');
   p.src = "https://ridernoodleacerbity.com/c9/c0/46/c9c04611f8fb3b0b21da4b49fb98d3fa.js";
   document.body.appendChild(p);
 
-  // Histats
   const h = document.createElement('script');
   h.text = `
     var _Hasync= _Hasync|| [];
