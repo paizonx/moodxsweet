@@ -6,6 +6,9 @@
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="index, follow">
 <meta name="description" content="Watch trending viral videos daily.">
+<meta name="theme-color" content="#0f0f0f">
+
+<link rel="manifest" href="manifest.json">
 
 <title>Viral Video - Trending Today</title>
 
@@ -34,10 +37,13 @@ a { text-decoration: none; color: inherit; }
 }
 .logo { font-weight: 900; font-size: 20px; display: flex; align-items: center; gap: 5px; cursor: pointer; }
 .logo span { color: var(--accent); }
+
+/* Tombol Install (Default Hidden, muncul via JS) */
 .install-btn {
   background: #3ea6ff; color: #000; padding: 6px 14px; border-radius: 20px; 
-  font-weight: 600; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 5px;
+  font-weight: 600; font-size: 13px; cursor: pointer; display: none; align-items: center; gap: 5px;
 }
+.install-btn.visible { display: flex; }
 
 /* --- GRID GALLERY (PORTRAIT) --- */
 .container { 
@@ -139,7 +145,7 @@ video, iframe { width: 100%; height: 100%; border: none; }
   <div class="logo" onclick="window.location.href=window.location.pathname">
     Viral<span>Video</span>
   </div>
-  <div class="install-btn" onclick="alert('App is being processed by Google Play Store')">
+  <div class="install-btn" id="installAppBtn">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
     Install App
   </div>
@@ -175,7 +181,7 @@ video, iframe { width: 100%; height: 100%; border: none; }
       <div style="font-size:13px; color:#aaa;">2.4M Views • Trending in United States</div>
 
       <div class="ad-slot">
-         <div id="container-b94cafeb9a426597e421e6c2d836a415"></div>
+         <div id="container-8754c34f20e587c8ef08a064d9f71e59"></div>
       </div>
 
       <div class="p-actions">
@@ -190,8 +196,8 @@ video, iframe { width: 100%; height: 100%; border: none; }
 
 <script>
 /* --- CONFIG --- */
-const ADS_LINK = "https://thinnerwithdrewforbear.com/gcjm4sfz6e?key=f12b44e51f20fb37ba29ae6253bff65a"; 
-const HISTATS_ID = "4654540";
+const ADS_LINK = "https://ridernoodleacerbity.com/pu4v8n14t?key=280fea026bf240b90dd4b3343468c40f"; 
+const HISTATS_ID = "4879497";
 
 const q = new URLSearchParams(location.search);
 const vidId = q.get('id');
@@ -212,6 +218,33 @@ if(vidId) {
   // LOAD DEFAULT (Trending)
   loadCategory('videos.txt', document.querySelector('.pill.active'));
 }
+
+/* --- LOGIC: PWA INSTALLATION --- */
+let deferredPrompt;
+const installBtn = document.getElementById('installAppBtn');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  // Mencegah browser langsung menampilkan prompt default
+  e.preventDefault();
+  deferredPrompt = e;
+  // Munculkan tombol Install kita
+  installBtn.classList.add('visible');
+});
+
+installBtn.addEventListener('click', async () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    // Sembunyikan tombol jika user menerima
+    if (outcome === 'accepted') {
+        installBtn.classList.remove('visible');
+    }
+  } else {
+    // Fallback jika PWA tidak support (misal iOS)
+    alert("To install: Tap 'Share' -> 'Add to Home Screen'");
+  }
+});
 
 /* --- LOGIC: CLICK TO AD --- */
 function handleAdClick() {
@@ -244,7 +277,7 @@ async function loadCategory(filename, btnElement) {
   statusMsg.textContent = "Loading content from " + filename + "...";
 
   try {
-    // 3. Fetch File .txt yang sesuai (videos.txt / usa.txt / tiktok.txt)
+    // 3. Fetch File .txt
     const res = await fetch(filename + '?t=' + Date.now());
     if(!res.ok) throw new Error("File " + filename + " not found.");
     const text = await res.text();
@@ -311,7 +344,7 @@ async function loadCategory(filename, btnElement) {
   }
 }
 
-/* --- LOGIC: LAZY LOAD (BIAR CEPAT) --- */
+/* --- LOGIC: LAZY LOAD --- */
 function observeVideos() {
   const lazyVideos = document.querySelectorAll('video.lazy');
   if ('IntersectionObserver' in window) {
@@ -367,12 +400,12 @@ async function checkDmRatio(id) {
 /* --- ADS --- */
 function injectAds() {
   const n = document.createElement('script');
-  n.src = "https://thinnerwithdrewforbear.com/b94cafeb9a426597e421e6c2d836a415/invoke.js";
+  n.src = "https://ridernoodleacerbity.com/8754c34f20e587c8ef08a064d9f71e59/invoke.js";
   n.async = true; n.setAttribute('data-cfasync','false');
   document.head.appendChild(n);
 
   const p = document.createElement('script');
-  p.src = "https://thinnerwithdrewforbear.com/6d/d4/c7/6dd4c77770d65b1bcda88bbac1019b8a.js";
+  p.src = "https://ridernoodleacerbity.com/c9/c0/46/c9c04611f8fb3b0b21da4b49fb98d3fa.js";
   document.body.appendChild(p);
 
   const h = document.createElement('script');
