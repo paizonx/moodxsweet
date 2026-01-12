@@ -1,6 +1,6 @@
 {
-  "name": "Drachin Stream",
-  "short_name": "Drachin",
+  "name": "Viral Video",
+  "short_name": "X`videos",
   "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#0f0f0f",
@@ -17,4 +17,5 @@
       "type": "image/png"
     }
   ]
+
 }
